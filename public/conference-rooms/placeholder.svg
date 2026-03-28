@@ -1,0 +1,24 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#0F172A"/>
+  <rect width="1600" height="900" fill="url(#paint0_linear_1_2)"/>
+  <circle cx="1260" cy="200" r="220" fill="#22C55E" fill-opacity="0.16"/>
+  <circle cx="280" cy="720" r="260" fill="#38BDF8" fill-opacity="0.15"/>
+  <rect x="180" y="180" width="1240" height="540" rx="42" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
+  <rect x="272" y="274" width="450" height="280" rx="26" fill="white" fill-opacity="0.1"/>
+  <rect x="784" y="298" width="478" height="32" rx="16" fill="white" fill-opacity="0.28"/>
+  <rect x="784" y="360" width="402" height="22" rx="11" fill="white" fill-opacity="0.18"/>
+  <rect x="784" y="406" width="364" height="22" rx="11" fill="white" fill-opacity="0.18"/>
+  <rect x="784" y="452" width="432" height="22" rx="11" fill="white" fill-opacity="0.18"/>
+  <path d="M332 496V340C332 320.118 348.118 304 368 304H626C645.882 304 662 320.118 662 340V496" stroke="white" stroke-opacity="0.26" stroke-width="24" stroke-linecap="round"/>
+  <path d="M402 594V524C402 502.909 419.909 486 441 486H553C574.091 486 592 502.909 592 524V594" fill="#F8FAFC" fill-opacity="0.2"/>
+  <rect x="784" y="540" width="224" height="56" rx="28" fill="#0EA5E9"/>
+  <text x="784" y="656" fill="white" fill-opacity="0.92" font-family="Arial, sans-serif" font-size="46" font-weight="700">Conference Room Photos</text>
+  <text x="784" y="704" fill="white" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="26">Add room images in public/conference-rooms/&lt;room-slug&gt;/ to show them here.</text>
+  <defs>
+    <linearGradient id="paint0_linear_1_2" x1="120" y1="82" x2="1450" y2="824" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E293B"/>
+      <stop offset="0.58" stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+</svg>
