@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew tap:*)",
+      "Bash(heroku auth:whoami)",
+      "Bash(heroku login:*)",
+      "Bash(open \"https://id.heroku.com/login\")",
+      "Bash(heroku apps:*)",
+      "Bash(node -e 'let d=\"\"\"\"\"\"\"\";process.stdin.on\\(\"\"\"\"data\"\"\"\",c=>d+=c\\);process.stdin.on\\(\"\"\"\"end\"\"\"\",\\(\\)=>{const apps=JSON.parse\\(d\\);apps.forEach\\(a=>console.log\\(a.name\\)\\)}\\)')",
+      "Bash(heroku git:remote -a hostel-booking-app)",
+      "Bash(heroku apps:destroy hostel-booking-improved --confirm hostel-booking-improved)",
+      "Bash(heroku logs:*)"
+    ]
+  }
+}

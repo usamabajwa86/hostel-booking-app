@@ -447,7 +447,7 @@ app.put('/api/settings', (req, res) => {
 
 // SPA catch-all — serve index.html for all non-API routes in production
 if (fs.existsSync(distDir)) {
-  app.get('*', (req, res) => {
+  app.get('/{*splat}', (req, res) => {
     res.sendFile(path.join(distDir, 'index.html'));
   });
 }
