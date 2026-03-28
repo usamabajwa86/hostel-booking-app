@@ -9,7 +9,11 @@
       "Bash(node -e 'let d=\"\"\"\"\"\"\"\";process.stdin.on\\(\"\"\"\"data\"\"\"\",c=>d+=c\\);process.stdin.on\\(\"\"\"\"end\"\"\"\",\\(\\)=>{const apps=JSON.parse\\(d\\);apps.forEach\\(a=>console.log\\(a.name\\)\\)}\\)')",
       "Bash(heroku git:remote -a hostel-booking-app)",
       "Bash(heroku apps:destroy hostel-booking-improved --confirm hostel-booking-improved)",
-      "Bash(heroku logs:*)"
+      "Bash(heroku logs:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://hostel-booking-app-5cd931308379.herokuapp.com/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://hostel-booking-app-5cd931308379.herokuapp.com/api/hostels)",
+      "Bash(curl -s https://hostel-booking-app-5cd931308379.herokuapp.com/api/hostels)",
+      "Bash(node -e 'let d=\"\"\"\"\"\"\"\";process.stdin.on\\(\"\"\"\"data\"\"\"\",c=>d+=c\\);process.stdin.on\\(\"\"\"\"end\"\"\"\",\\(\\)=>{const h=JSON.parse\\(d\\);console.log\\(\"\"\"\"Hostels:\"\"\"\",h.length,\"\"\"\"| Beds:\"\"\"\",h.reduce\\(\\(s,x\\)=>s+x.rooms.reduce\\(\\(s2,r\\)=>s2+r.beds.length,0\\),0\\),\"\"\"\"| Images:\"\"\"\",h.filter\\(x=>x.images&&x.images.length>0\\).length\\)}\\)')"
     ]
   }
 }
