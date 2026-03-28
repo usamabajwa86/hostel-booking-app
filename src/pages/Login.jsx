@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, AlertCircle, Building2 } from 'lucide-react';
+import { LogIn, Mail, Lock, AlertCircle, Building2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const API = '/api';
@@ -60,6 +60,15 @@ export default function Login() {
           }}
         />
       </div>
+
+      {/* Back to Home */}
+      <Link
+        to="/"
+        className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-800 transition-colors bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-emerald-100"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Home
+      </Link>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo */}
