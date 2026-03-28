@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, AlertCircle, CheckCircle, Building2, User, Hash, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 export default function Register() {
   const [form, setForm] = useState({

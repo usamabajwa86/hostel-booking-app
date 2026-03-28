@@ -16,7 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import BedGrid from '../components/ui/BedGrid';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 
 function ImageGallery({ images, name }) {
@@ -34,7 +34,7 @@ function ImageGallery({ images, name }) {
           onClick={() => setLightbox(true)}
         >
           <img
-            src={`http://localhost:5000${images[selected]}`}
+            src={`${images[selected]}`}
             alt={`${name} - ${selected + 1}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -55,7 +55,7 @@ function ImageGallery({ images, name }) {
               }`}
             >
               <img
-                src={`http://localhost:5000${img}`}
+                src={`${img}`}
                 alt={`${name} thumbnail ${i + 1}`}
                 className="w-full h-full object-cover"
               />
@@ -95,7 +95,7 @@ function ImageGallery({ images, name }) {
             <ChevronRight className="h-8 w-8" />
           </button>
           <img
-            src={`http://localhost:5000${images[selected]}`}
+            src={`${images[selected]}`}
             alt={`${name} - ${selected + 1}`}
             className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
@@ -187,7 +187,7 @@ export default function HostelDetail() {
 
   const occupancy = totalBeds > 0 ? Math.round(((totalBeds - vacantBeds) / totalBeds) * 100) : 0;
   const hasImages = hostel.images && hostel.images.length > 0;
-  const coverImage = hasImages ? `http://localhost:5000${hostel.images[0]}` : null;
+  const coverImage = hasImages ? `${hostel.images[0]}` : null;
 
   const statCards = [
     { label: 'Total Rooms', value: totalRooms, icon: DoorOpen, color: 'bg-blue-50 text-blue-600' },

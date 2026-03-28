@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/Toast';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 const fields = [
   { key: 'siteName', label: 'Site Name', type: 'text' },

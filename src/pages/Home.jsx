@@ -22,7 +22,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 const stats = [
   { icon: Building2, label: 'Female Hostels', value: '17', suffix: '' },
@@ -152,7 +152,7 @@ export default function Home() {
         {/* Background image */}
         <div className="absolute inset-0">
           <img
-            src="http://localhost:5000/hostel-pictures/sir-syed/sir-syed-01.jpeg"
+            src="hostel-pictures/sir-syed/sir-syed-01.jpeg"
             alt=""
             className="w-full h-full object-cover"
           />
@@ -320,7 +320,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center gap-8 border border-emerald-100">
             <img
-              src="http://localhost:5000/vc-zulfiqar-ali.jpg"
+              src="vc-zulfiqar-ali.jpg"
               alt="Prof. Dr. Zulfiqar Ali, Vice Chancellor"
               className="w-40 h-40 sm:w-48 sm:h-48 rounded-2xl object-cover shadow-lg flex-shrink-0"
             />
@@ -550,7 +550,7 @@ export default function Home() {
                 >
                   <div className="relative h-52 overflow-hidden">
                     <img
-                      src={`http://localhost:5000${h.images[0]}`}
+                      src={`${h.images[0]}`}
                       alt={h.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -565,7 +565,7 @@ export default function Home() {
                       {h.images.slice(0, 4).map((img, j) => (
                         <div key={j} className="h-14 w-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
                           <img
-                            src={`http://localhost:5000${img}`}
+                            src={`${img}`}
                             alt={`${h.name} ${j + 1}`}
                             className="w-full h-full object-cover"
                           />
@@ -630,7 +630,7 @@ export default function Home() {
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center sm:text-left">
                 <div className="flex items-center gap-4 mb-4">
                   <img
-                    src="http://localhost:5000/humera-razaq.jpg"
+                    src="humera-razaq.jpg"
                     alt="Humera Razaq"
                     className="w-16 h-16 rounded-full object-cover shadow-md"
                   />

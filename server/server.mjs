@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -24,6 +24,12 @@ app.use('/hostel-pictures', express.static(path.join(publicDir, 'hostel-pictures
 }));
 app.use('/vc-zulfiqar-ali.jpg', express.static(path.join(publicDir, 'vc-zulfiqar-ali.jpg')));
 app.use('/humera-razaq.jpg', express.static(path.join(publicDir, 'humera-razaq.jpg')));
+
+// Serve Vite built frontend in production
+const distDir = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir));
+}
 
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
@@ -438,6 +444,13 @@ app.put('/api/settings', (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// SPA catch-all — serve index.html for all non-API routes in production
+if (fs.existsSync(distDir)) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distDir, 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

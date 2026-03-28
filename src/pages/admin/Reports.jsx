@@ -16,7 +16,7 @@ import {
 import StatsCard from "../../components/ui/StatsCard";
 import { useToast } from "../../components/ui/Toast";
 
-const API = "http://localhost:5000/api";
+const API = "/api";
 
 const COLORS = {
   emerald: "#10b981",

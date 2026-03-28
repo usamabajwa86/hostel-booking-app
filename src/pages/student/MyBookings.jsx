@@ -6,7 +6,7 @@ import { useToast } from '../../components/ui/Toast';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Modal from '../../components/ui/Modal';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 const timelineIcons = {
   pending: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },

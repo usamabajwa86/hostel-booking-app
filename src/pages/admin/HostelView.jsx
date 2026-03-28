@@ -4,7 +4,7 @@ import StatsCard from "../../components/ui/StatsCard";
 import BedGrid from "../../components/ui/BedGrid";
 import { useToast } from "../../components/ui/Toast";
 
-const API = "http://localhost:5000/api";
+const API = "/api";
 
 export default function HostelView() {
   const [hostels, setHostels] = useState([]);

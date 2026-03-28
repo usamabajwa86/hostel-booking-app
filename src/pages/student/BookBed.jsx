@@ -7,7 +7,7 @@ import BedGrid from '../../components/ui/BedGrid';
 import IdCardUpload from '../../components/ui/IdCardUpload';
 import Modal from '../../components/ui/Modal';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 export default function BookBed() {
   const { hostelId } = useParams();

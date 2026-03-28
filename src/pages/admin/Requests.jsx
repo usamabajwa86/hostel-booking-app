@@ -13,8 +13,8 @@ import StatusBadge from "../../components/ui/StatusBadge";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 
-const API = "http://localhost:5000/api";
-const SERVER = "http://localhost:5000";
+const API = "/api";
+const SERVER = "";
 const PER_PAGE = 20;
 
 export default function Requests() {
@@ -140,19 +140,19 @@ export default function Requests() {
             <Download className="h-4 w-4" /> Export Requests
           </button>
           <a
-            href="http://localhost:5000/api/admin/export/students"
+            href="/api/admin/export/students"
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
           >
             <Download className="h-4 w-4" /> Students CSV
           </a>
           <a
-            href="http://localhost:5000/api/admin/export/beds"
+            href="/api/admin/export/beds"
             className="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors text-sm font-medium"
           >
             <Download className="h-4 w-4" /> Bed Map CSV
           </a>
           <a
-            href="http://localhost:5000/api/admin/export/history"
+            href="/api/admin/export/history"
             className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
           >
             <Download className="h-4 w-4" /> History CSV

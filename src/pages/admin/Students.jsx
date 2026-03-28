@@ -3,7 +3,7 @@ import { Search, Download } from "lucide-react";
 import StatusBadge from "../../components/ui/StatusBadge";
 import { useToast } from "../../components/ui/Toast";
 
-const API = "http://localhost:5000/api";
+const API = "/api";
 
 export default function Students() {
   const [users, setUsers] = useState([]);
@@ -97,7 +97,7 @@ export default function Students() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Student Registry</h1>
         <a
-          href="http://localhost:5000/api/admin/export/students"
+          href="/api/admin/export/students"
           className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
         >
           <Download className="h-4 w-4" /> Export CSV

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Building2, BedDouble, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 export default function Dashboard() {
   const { user } = useAuth();

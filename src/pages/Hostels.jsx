@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Search, ArrowRight, BedDouble, DoorOpen, Users, Filter } from 'lucide-react';
 
-const API = 'http://localhost:5000/api';
+const API = '/api';
 
 function useInView(threshold = 0.1) {
   const ref = useRef(null);
@@ -194,7 +194,7 @@ export default function Hostels() {
                 const isFemale = h.type === 'female';
                 const totalRooms = h.rooms ? h.rooms.length : (h.ugRooms || 0) + (h.pgRooms || 0);
                 const bedCount = h.rooms ? h.rooms.reduce((s, r) => s + (r.beds?.length || 0), 0) : (h.totalBeds || h.totalCapacity || h.capacity || 0);
-                const coverImage = h.images && h.images.length > 0 ? `http://localhost:5000${h.images[0]}` : null;
+                const coverImage = h.images && h.images.length > 0 ? `${h.images[0]}` : null;
 
                 return (
                   <Link
