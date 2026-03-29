@@ -152,7 +152,7 @@ export default function Home() {
         {/* Background image */}
         <div className="absolute inset-0">
           <img
-            src="hostel-pictures/sir-syed/sir-syed-01.jpeg"
+            src="/uaf-hero.jpg"
             alt=""
             className="w-full h-full object-cover"
           />

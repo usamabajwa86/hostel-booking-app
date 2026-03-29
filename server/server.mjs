@@ -24,6 +24,7 @@ app.use('/hostel-pictures', express.static(path.join(publicDir, 'hostel-pictures
 }));
 app.use('/vc-zulfiqar-ali.jpg', express.static(path.join(publicDir, 'vc-zulfiqar-ali.jpg')));
 app.use('/humera-razaq.jpg', express.static(path.join(publicDir, 'humera-razaq.jpg')));
+app.use('/uaf-hero.jpg', express.static(path.join(publicDir, 'uaf-hero.jpg')));
 
 // Serve Vite built frontend in production
 const distDir = path.join(__dirname, '..', 'dist');
