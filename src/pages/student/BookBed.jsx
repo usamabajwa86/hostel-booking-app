@@ -19,6 +19,13 @@ export default function BookBed() {
   const [selectedBed, setSelectedBed] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [idCardImage, setIdCardImage] = useState(null);
+  const [challan, setChallan] = useState({
+    bankName: '',
+    paidAmount: '',
+    challanNumber: '',
+    bankBranch: '',
+    submissionDate: '',
+  });
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
@@ -64,11 +71,14 @@ export default function BookBed() {
     }
     setSelectedBed({ ...bed, roomNumber });
     setIdCardImage(null);
+    setChallan({ bankName: '', paidAmount: '', challanNumber: '', bankBranch: '', submissionDate: '' });
     setModalOpen(true);
   };
 
+  const isChallanValid = challan.bankName && challan.paidAmount && challan.challanNumber && challan.bankBranch && challan.submissionDate;
+
   const handleConfirmBooking = async () => {
-    if (!idCardImage || !selectedBed) return;
+    if ((!idCardImage && !isChallanValid) || !selectedBed) return;
 
     setSubmitting(true);
     try {
@@ -79,12 +89,13 @@ export default function BookBed() {
           userId: user.id,
           userName: user.name,
           userEmail: user.email,
-          studentId: user.studentId,
+          studentId: user.studentId || '',
           hostelId,
           hostelName: hostel.name,
           roomNumber: selectedBed.roomNumber,
           bedId: selectedBed.id,
-          idCardImage,
+          idCardImage: idCardImage || '',
+          challan: isChallanValid ? challan : undefined,
         }),
       });
 
@@ -282,9 +293,68 @@ export default function BookBed() {
             </div>
           </div>
 
+          {/* Bank / Challan Details */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-700">Bank / Challan Details <span className="text-red-500">*</span></h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Bank Name</label>
+                <input
+                  type="text"
+                  value={challan.bankName}
+                  onChange={(e) => setChallan({ ...challan, bankName: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g. HBL, MCB"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Total Paid Amount</label>
+                <input
+                  type="text"
+                  value={challan.paidAmount}
+                  onChange={(e) => setChallan({ ...challan, paidAmount: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g. 5000"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Challan Number</label>
+              <input
+                type="text"
+                value={challan.challanNumber}
+                onChange={(e) => setChallan({ ...challan, challanNumber: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Enter challan number"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Bank Branch</label>
+                <input
+                  type="text"
+                  value={challan.bankBranch}
+                  onChange={(e) => setChallan({ ...challan, bankBranch: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Branch name"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Submission Date</label>
+                <input
+                  type="date"
+                  value={challan.submissionDate}
+                  onChange={(e) => setChallan({ ...challan, submissionDate: e.target.value })}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Upload paid voucher */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload ID Card <span className="text-red-500">*</span>
+              Upload Paid Voucher Image <span className="text-red-500">*</span>
             </label>
             <IdCardUpload value={idCardImage} onChange={setIdCardImage} />
           </div>
@@ -299,7 +369,7 @@ export default function BookBed() {
             </button>
             <button
               onClick={handleConfirmBooking}
-              disabled={!idCardImage || submitting}
+              disabled={(!isChallanValid && !idCardImage) || submitting}
               className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (

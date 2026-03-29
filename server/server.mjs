@@ -77,22 +77,21 @@ function mergeBedStatuses(hostels, requests) {
 
 app.post('/api/auth/register', (req, res) => {
   try {
-    const { name, email, password, studentId, gender, program } = req.body;
-    if (!name || !email || !password || !studentId || !gender || !program) {
-      return res.status(400).json({ error: 'All fields are required' });
+    const { name, email, password, gender, program } = req.body;
+    if (!name || !email || !password || !program) {
+      return res.status(400).json({ error: 'Name, email, password, and program are required' });
     }
 
     const users = readJSON(USERS_FILE);
     if (users.find(u => u.email === email)) {
       return res.status(409).json({ error: 'Email already registered' });
     }
-    if (users.find(u => u.studentId === studentId)) {
-      return res.status(409).json({ error: 'Student ID already registered' });
-    }
 
     const newUser = {
       id: `s${Date.now()}`,
-      name, email, password, studentId, gender, program,
+      name, email, password,
+      gender: gender || 'female',
+      program,
       role: 'student',
       registeredAt: new Date().toISOString()
     };
@@ -166,8 +165,8 @@ app.get('/api/hostels/:id', (req, res) => {
 
 app.post('/api/requests', (req, res) => {
   try {
-    const { userId, userName, userEmail, studentId, hostelId, hostelName, roomNumber, bedId, idCardImage } = req.body;
-    if (!userId || !userName || !userEmail || !studentId || !hostelId || !hostelName || !roomNumber || !bedId) {
+    const { userId, userName, userEmail, studentId, hostelId, hostelName, roomNumber, bedId, idCardImage, challan } = req.body;
+    if (!userId || !userName || !userEmail || !hostelId || !hostelName || !roomNumber || !bedId) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -196,9 +195,10 @@ app.post('/api/requests', (req, res) => {
     const now = new Date().toISOString();
     const newRequest = {
       id: requestId,
-      userId, userName, userEmail, studentId,
+      userId, userName, userEmail, studentId: studentId || '',
       hostelId, hostelName, roomNumber, bedId,
       idCardImage: idCardPath,
+      challan: challan || null,
       status: 'pending',
       submittedAt: now,
       history: [

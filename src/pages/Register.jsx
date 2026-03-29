@@ -8,10 +8,9 @@ const API = '/api';
 export default function Register() {
   const [form, setForm] = useState({
     name: '',
-    studentId: '',
     email: '',
     password: '',
-    gender: '',
+    gender: 'female',
     program: '',
   });
   const [loading, setLoading] = useState(false);
@@ -141,22 +140,6 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Student ID</label>
-              <div className="relative">
-                <Hash className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  name="studentId"
-                  value={form.studentId}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
-                  placeholder="2021-ag-1234"
-                />
-              </div>
-            </div>
-
-            <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -189,36 +172,20 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gender</label>
-                <select
-                  name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
-                >
-                  <option value="">Select</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Program</label>
-                <select
-                  name="program"
-                  value={form.program}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
-                >
-                  <option value="">Select</option>
-                  <option value="UG">UG</option>
-                  <option value="PG">PG</option>
-                  <option value="Scholar">Scholar</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Program</label>
+              <select
+                name="program"
+                value={form.program}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
+              >
+                <option value="">Select Program</option>
+                <option value="UG">Undergraduate (UG)</option>
+                <option value="PG">Postgraduate (PG)</option>
+                <option value="Scholar">Scholar</option>
+              </select>
             </div>
 
             <button
