@@ -189,6 +189,11 @@ export default function HostelDetail() {
   const hasImages = hostel.images && hostel.images.length > 0;
   const coverImage = hasImages ? `${hostel.images[0]}` : null;
 
+  const ugRooms = hostel.rooms ? hostel.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'undergraduate').length : 0;
+  const pgRooms = hostel.rooms ? hostel.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'postgraduate').length : 0;
+  const ugBeds = hostel.rooms ? hostel.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'undergraduate').reduce((s, r) => s + (r.beds?.length || 0), 0) : 0;
+  const pgBeds = hostel.rooms ? hostel.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'postgraduate').reduce((s, r) => s + (r.beds?.length || 0), 0) : 0;
+
   const statCards = [
     { label: 'Total Rooms', value: totalRooms, icon: DoorOpen, color: 'bg-blue-50 text-blue-600' },
     { label: 'Total Beds', value: totalBeds, icon: BedDouble, color: 'bg-emerald-50 text-emerald-600' },
@@ -322,6 +327,29 @@ export default function HostelDetail() {
             </div>
           </div>
         </div>
+
+        {/* UG/PG Breakdown */}
+        {(ugRooms > 0 || pgRooms > 0) && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Program Breakdown</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {ugRooms > 0 && (
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-blue-600 uppercase mb-1">Undergraduate (UG)</p>
+                  <p className="text-xl font-bold text-blue-900">{ugRooms} <span className="text-sm font-normal text-blue-600">rooms</span></p>
+                  <p className="text-sm text-blue-700 mt-0.5">{ugBeds} beds (Dormitory)</p>
+                </div>
+              )}
+              {pgRooms > 0 && (
+                <div className="bg-purple-50 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-purple-600 uppercase mb-1">Postgraduate (PG)</p>
+                  <p className="text-xl font-bold text-purple-900">{pgRooms} <span className="text-sm font-normal text-purple-600">rooms</span></p>
+                  <p className="text-sm text-purple-700 mt-0.5">{pgBeds} beds (Coupled/Warden)</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Bed Grid */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">

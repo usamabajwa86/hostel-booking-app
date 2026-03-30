@@ -79,8 +79,11 @@ export default function BedGrid({ rooms = [], onBedClick }) {
           const roomNum = room.number || room.roomNumber || '';
           const beds = room.beds || [];
           const vacantCount = beds.filter(b => !b.status || b.status === 'vacant').length;
-          const typeBadge =
-            room.type === 'PG'
+          const progCat = (room.programCategory || '').toLowerCase();
+          const isPostgrad = progCat === 'postgraduate' || room.type === 'PG';
+          const roomTypeLabel = room.type === 'Coupled' ? 'Coupled' : room.type === 'Warden' ? 'Warden' : room.type === 'Dormitory' ? 'Dormitory' : room.type || '';
+          const progLabel = isPostgrad ? 'PG' : 'UG';
+          const typeBadge = isPostgrad
               ? 'bg-purple-50 text-purple-700 ring-1 ring-purple-200'
               : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200';
 
@@ -98,8 +101,13 @@ export default function BedGrid({ rooms = [], onBedClick }) {
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${typeBadge}`}
                   >
-                    {room.type || 'UG'}
+                    {progLabel}
                   </span>
+                  {roomTypeLabel && (
+                    <span className="text-[10px] text-gray-500 font-medium">
+                      {roomTypeLabel}
+                    </span>
+                  )}
                   {room.floor && (
                     <span className="text-[10px] text-gray-400 font-medium">
                       {room.floor}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Search, ArrowRight, BedDouble, DoorOpen, Users, Filter } from 'lucide-react';
+import { Building2, Search, ArrowRight, BedDouble, DoorOpen, Users, Filter, GraduationCap } from 'lucide-react';
 
 const API = '/api';
 
@@ -25,6 +25,7 @@ export default function Hostels() {
   const [loading, setLoading] = useState(true);
   const [gender, setGender] = useState('all');
   const [category, setCategory] = useState('all');
+  const [program, setProgram] = useState('all');
   const [search, setSearch] = useState('');
   const [gridRef, gridVisible] = useInView();
 
@@ -42,6 +43,15 @@ export default function Hostels() {
   const filtered = hostels.filter((h) => {
     if (gender !== 'all' && h.type !== gender) return false;
     if (category !== 'all' && h.category?.toLowerCase() !== category.toLowerCase()) return false;
+    if (program !== 'all' && h.rooms) {
+      const hasProgram = h.rooms.some(r => {
+        const cat = (r.programCategory || '').toLowerCase();
+        if (program === 'ug') return cat === 'undergraduate';
+        if (program === 'pg') return cat === 'postgraduate';
+        return true;
+      });
+      if (!hasProgram) return false;
+    }
     if (search && !h.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -122,17 +132,26 @@ export default function Hostels() {
             Filter Hostels
           </div>
           <div className="flex flex-col md:flex-row md:items-center gap-4">
-            {/* Category dropdown */}
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-            >
-              <option value="all">All Categories</option>
-              <option value="UG">UG</option>
-              <option value="PG">PG</option>
-              <option value="Mixed">Mixed</option>
-            </select>
+            {/* Program filter */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+              {[
+                { val: 'all', label: 'All Programs' },
+                { val: 'ug', label: 'UG Rooms' },
+                { val: 'pg', label: 'PG Rooms' },
+              ].map((p) => (
+                <button
+                  key={p.val}
+                  onClick={() => setProgram(p.val)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    program === p.val
+                      ? 'bg-white shadow-sm text-emerald-700 scale-[1.02]'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
 
             {/* Search */}
             <div className="relative flex-1">
@@ -154,9 +173,9 @@ export default function Hostels() {
             Showing <span className="font-semibold text-gray-800">{filtered.length}</span> of{' '}
             <span className="font-semibold text-gray-800">{hostels.length}</span> hostels
           </p>
-          {(gender !== 'all' || category !== 'all' || search) && (
+          {(gender !== 'all' || category !== 'all' || program !== 'all' || search) && (
             <button
-              onClick={() => { setGender('all'); setCategory('all'); setSearch(''); }}
+              onClick={() => { setGender('all'); setCategory('all'); setProgram('all'); setSearch(''); }}
               className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
             >
               Clear Filters
@@ -194,6 +213,8 @@ export default function Hostels() {
                 const isFemale = h.type === 'female';
                 const totalRooms = h.rooms ? h.rooms.length : (h.ugRooms || 0) + (h.pgRooms || 0);
                 const bedCount = h.rooms ? h.rooms.reduce((s, r) => s + (r.beds?.length || 0), 0) : (h.totalBeds || h.totalCapacity || h.capacity || 0);
+                const ugRooms = h.rooms ? h.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'undergraduate').length : 0;
+                const pgRooms = h.rooms ? h.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'postgraduate').length : 0;
                 const coverImage = h.images && h.images.length > 0 ? `${h.images[0]}` : null;
 
                 return (
@@ -282,6 +303,22 @@ export default function Hostels() {
                           <p className="text-[10px] text-gray-500 uppercase tracking-wide">Full</p>
                         </div>
                       </div>
+
+                      {/* UG/PG breakdown */}
+                      {(ugRooms > 0 || pgRooms > 0) && (
+                        <div className="flex gap-2 mb-3">
+                          {ugRooms > 0 && (
+                            <span className="text-xs font-medium px-2 py-1 rounded-lg bg-blue-50 text-blue-700">
+                              UG: {ugRooms} rooms
+                            </span>
+                          )}
+                          {pgRooms > 0 && (
+                            <span className="text-xs font-medium px-2 py-1 rounded-lg bg-purple-50 text-purple-700">
+                              PG: {pgRooms} rooms
+                            </span>
+                          )}
+                        </div>
+                      )}
 
                       {/* Occupancy bar */}
                       <div className="mb-4">
