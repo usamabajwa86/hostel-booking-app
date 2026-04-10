@@ -184,7 +184,14 @@ export default function Dashboard() {
                   key={hostel._id || hostel.id}
                   className="bg-white rounded-xl border border-gray-200 p-5 flex flex-col"
                 >
-                  <h3 className="text-base font-semibold text-gray-900">{hostel.name}</h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base font-semibold text-gray-900">{hostel.name}</h3>
+                    {hostel.category === 'PG' && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 flex-shrink-0">
+                        PG Only
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-3 space-y-2 text-sm text-gray-500 flex-1">
                     <div className="flex justify-between">
                       <span>Capacity</span>

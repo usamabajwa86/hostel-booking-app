@@ -212,6 +212,32 @@ export default function BookBed() {
     );
   }
 
+  // Eligibility gate: UG students cannot book PG-only hostels
+  const studentProgram = (user?.profile?.program || user?.program || '').toLowerCase();
+  const hostelCategory = (hostel?.category || '').toLowerCase();
+  if (studentProgram === 'ug' && hostelCategory === 'pg') {
+    return (
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white rounded-2xl border border-red-200 shadow-sm p-8 text-center">
+          <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Not eligible for this hostel</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            <strong>{hostel.name}</strong> is reserved for postgraduate students only.
+            As an undergraduate, please choose any of the other 16 hostels available to you.
+          </p>
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
+          >
+            Browse Eligible Hostels
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const totalRooms = hostel.rooms?.length || 0;
   const totalBeds = (hostel.rooms || []).reduce((s, r) => s + (r.beds?.length || 0), 0);
   const vacantBeds = (hostel.rooms || []).reduce(

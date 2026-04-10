@@ -234,10 +234,15 @@ export default function Hostels() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3 flex gap-1.5">
                           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-pink-400 text-pink-950">
                             Female
                           </span>
+                          {h.category === 'PG' && (
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500 text-white shadow">
+                              PG Only
+                            </span>
+                          )}
                         </div>
                         <div className="absolute bottom-3 left-3 text-white font-bold text-sm drop-shadow-lg">
                           {h.images.length} Photos

@@ -324,6 +324,20 @@ app.post('/api/requests', (req, res) => {
       });
     }
 
+    // Enforce program eligibility: UG students cannot book PG-only hostels
+    const studentProgram = (user.profile?.program || user.program || '').toLowerCase();
+    const hostelsRaw = readJSON(HOSTELS_FILE);
+    const allHostels = hostelsRaw.hostels || hostelsRaw;
+    const targetHostel = allHostels.find(h => h.id === hostelId);
+    if (!targetHostel) return res.status(404).json({ error: 'Hostel not found' });
+    const targetCategory = (targetHostel.category || '').toLowerCase();
+    if (studentProgram === 'ug' && targetCategory === 'pg') {
+      return res.status(403).json({
+        error: `${targetHostel.name} is reserved for postgraduate students only.`,
+        code: 'NOT_ELIGIBLE',
+      });
+    }
+
     // Enforce challan vs registration ID logic
     if (semesterStatus === 'first') {
       if (!challan || !challan.challanNumber || !challan.bankName || !challan.paidAmount) {
