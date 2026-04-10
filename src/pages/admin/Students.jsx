@@ -77,8 +77,9 @@ export default function Students() {
     if (search) {
       const q = search.toLowerCase();
       const nameMatch = (u.name || "").toLowerCase().includes(q);
-      const idMatch = (u.studentId || "").toLowerCase().includes(q);
-      if (!nameMatch && !idMatch) return false;
+      const idMatch = (u.studentId || u.profile?.registrationNumber || "").toLowerCase().includes(q);
+      const emailMatch = (u.email || "").toLowerCase().includes(q);
+      if (!nameMatch && !idMatch && !emailMatch) return false;
     }
 
     return true;
@@ -181,14 +182,14 @@ export default function Students() {
                     <td className="px-4 py-3 text-sm text-gray-900 font-medium">
                       {user.name || "N/A"}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {user.studentId || "N/A"}
+                    <td className="px-4 py-3 text-sm text-gray-600 font-mono text-xs">
+                      {user.profile?.registrationNumber || user.studentId || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {user.email || "N/A"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 capitalize">
-                      {user.program || "N/A"}
+                      {user.profile?.program || user.program || "—"}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 capitalize">
                       {user.gender || "N/A"}

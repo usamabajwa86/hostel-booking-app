@@ -23,8 +23,6 @@ function useInView(threshold = 0.1) {
 export default function Hostels() {
   const [hostels, setHostels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [gender, setGender] = useState('all');
-  const [category, setCategory] = useState('all');
   const [program, setProgram] = useState('all');
   const [search, setSearch] = useState('');
   const [gridRef, gridVisible] = useInView();
@@ -41,8 +39,6 @@ export default function Hostels() {
   }, []);
 
   const filtered = hostels.filter((h) => {
-    if (gender !== 'all' && h.type !== gender) return false;
-    if (category !== 'all' && h.category?.toLowerCase() !== category.toLowerCase()) return false;
     if (program !== 'all' && h.rooms) {
       const hasProgram = h.rooms.some(r => {
         const cat = (r.programCategory || '').toLowerCase();
@@ -72,7 +68,11 @@ export default function Hostels() {
     return Math.round(((total - vacant) / total) * 100);
   };
 
-  const totalBeds = hostels.reduce((sum, h) => sum + (h.totalBeds || h.totalCapacity || h.capacity || 0), 0);
+  const totalBeds = hostels.reduce((sum, h) => {
+    if (h.rooms) return sum + h.rooms.reduce((s, r) => s + (r.beds?.length || 0), 0);
+    return sum + (h.totalBeds || h.totalCapacity || h.capacity || 0);
+  }, 0);
+  const totalRooms = hostels.reduce((sum, h) => sum + (h.rooms?.length || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,12 +106,12 @@ export default function Hostels() {
               <span className="text-sm font-medium">{hostels.length} Hostels</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
-              <Users className="h-4 w-4 text-pink-300" />
-              <span className="text-sm font-medium">{hostels.length} Female</span>
+              <DoorOpen className="h-4 w-4 text-pink-300" />
+              <span className="text-sm font-medium">{totalRooms.toLocaleString()} Rooms</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
               <BedDouble className="h-4 w-4 text-emerald-300" />
-              <span className="text-sm font-medium">{totalBeds.toLocaleString()}+ Beds</span>
+              <span className="text-sm font-medium">{totalBeds.toLocaleString()} Beds</span>
             </div>
           </div>
         </div>
@@ -173,9 +173,9 @@ export default function Hostels() {
             Showing <span className="font-semibold text-gray-800">{filtered.length}</span> of{' '}
             <span className="font-semibold text-gray-800">{hostels.length}</span> hostels
           </p>
-          {(gender !== 'all' || category !== 'all' || program !== 'all' || search) && (
+          {(program !== 'all' || search) && (
             <button
-              onClick={() => { setGender('all'); setCategory('all'); setProgram('all'); setSearch(''); }}
+              onClick={() => { setProgram('all'); setSearch(''); }}
               className="text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
             >
               Clear Filters
@@ -210,8 +210,7 @@ export default function Hostels() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((h, i) => {
                 const occ = occupancy(h);
-                const isFemale = h.type === 'female';
-                const totalRooms = h.rooms ? h.rooms.length : (h.ugRooms || 0) + (h.pgRooms || 0);
+                const totalRoomsCard = h.rooms ? h.rooms.length : (h.ugRooms || 0) + (h.pgRooms || 0);
                 const bedCount = h.rooms ? h.rooms.reduce((s, r) => s + (r.beds?.length || 0), 0) : (h.totalBeds || h.totalCapacity || h.capacity || 0);
                 const ugRooms = h.rooms ? h.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'undergraduate').length : 0;
                 const pgRooms = h.rooms ? h.rooms.filter(r => (r.programCategory || '').toLowerCase() === 'postgraduate').length : 0;
@@ -236,10 +235,8 @@ export default function Hostels() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute top-3 left-3">
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                            isFemale ? 'bg-pink-400 text-pink-950' : 'bg-blue-400 text-blue-950'
-                          }`}>
-                            {isFemale ? 'Female' : 'Male'}
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-pink-400 text-pink-950">
+                            Female
                           </span>
                         </div>
                         <div className="absolute bottom-3 left-3 text-white font-bold text-sm drop-shadow-lg">
@@ -247,27 +244,21 @@ export default function Hostels() {
                         </div>
                       </div>
                     ) : (
-                      <div className={`h-1.5 ${isFemale ? 'bg-gradient-to-r from-pink-400 to-pink-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'}`} />
+                      <div className="h-1.5 bg-gradient-to-r from-pink-400 to-pink-500" />
                     )}
 
                     <div className="p-5">
                       {/* Header row */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className={`inline-flex items-center justify-center h-10 w-10 rounded-xl ${
-                            isFemale ? 'bg-pink-50 text-pink-600' : 'bg-blue-50 text-blue-600'
-                          } group-hover:scale-110 transition-transform duration-300`}>
+                          <div className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-pink-50 text-pink-600 group-hover:scale-110 transition-transform duration-300">
                             <Building2 className="h-5 w-5" />
                           </div>
                           <div>
                             <h3 className="font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">{h.name}</h3>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span
-                                className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                  isFemale ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
-                                }`}
-                              >
-                                {isFemale ? 'Female' : 'Male'}
+                              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700">
+                                Female
                               </span>
                               {h.category && (
                                 <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
@@ -292,7 +283,7 @@ export default function Hostels() {
                           <div className="flex items-center justify-center gap-1 text-gray-400 mb-1">
                             <DoorOpen className="h-3.5 w-3.5" />
                           </div>
-                          <p className="text-lg font-bold text-gray-900">{totalRooms}</p>
+                          <p className="text-lg font-bold text-gray-900">{totalRoomsCard}</p>
                           <p className="text-[10px] text-gray-500 uppercase tracking-wide">Rooms</p>
                         </div>
                         <div className="text-center">

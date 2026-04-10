@@ -92,30 +92,33 @@ export default function Reports() {
     { name: "Rejected", value: rejectedCount },
   ];
 
-  // Gender Distribution
-  const students = users.filter((u) => u.role !== "admin");
-  const maleCount = students.filter(
-    (u) => (u.gender || "").toLowerCase() === "male"
+  // Semester Status (1st sem vs senior)
+  const students = users.filter((u) => u.role === "student");
+  const firstSemCount = students.filter(
+    (u) => (u.profile?.semesterStatus || "").toLowerCase() === "first"
   ).length;
-  const femaleCount = students.filter(
-    (u) => (u.gender || "").toLowerCase() === "female"
+  const seniorCount = students.filter(
+    (u) => (u.profile?.semesterStatus || "").toLowerCase() === "senior"
   ).length;
+  const noProfileCount = students.filter((u) => !u.profile).length;
   const genderData = [
-    { name: "Male", value: maleCount },
-    { name: "Female", value: femaleCount },
+    { name: "1st Semester", value: firstSemCount },
+    { name: "Senior", value: seniorCount },
+    { name: "Profile Pending", value: noProfileCount },
   ];
 
-  // Program Distribution
+  // Program Distribution (read from profile.program first, fallback to top-level)
+  const getProgram = (u) => (u.profile?.program || u.program || "").toLowerCase();
   const ugCount = students.filter((u) => {
-    const p = (u.program || "").toLowerCase();
+    const p = getProgram(u);
     return p === "ug" || p === "undergraduate";
   }).length;
   const pgCount = students.filter((u) => {
-    const p = (u.program || "").toLowerCase();
+    const p = getProgram(u);
     return p === "pg" || p === "postgraduate";
   }).length;
   const scholarCount = students.filter((u) => {
-    const p = (u.program || "").toLowerCase();
+    const p = getProgram(u);
     return p === "scholar" || p === "phd";
   }).length;
   const programData = [
@@ -220,10 +223,10 @@ export default function Reports() {
           </ResponsiveContainer>
         </div>
 
-        {/* 3. Gender Distribution */}
+        {/* 3. Semester Status */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Gender Distribution
+            Students by Semester Status
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>

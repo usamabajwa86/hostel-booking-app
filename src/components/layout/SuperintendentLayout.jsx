@@ -1,20 +1,24 @@
 import { useState } from 'react';
 import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, BookOpen, LogOut, Menu, X, User, ExternalLink, IdCard } from 'lucide-react';
+import {
+  LayoutDashboard, ClipboardList, Users, BedDouble,
+  LogOut, Menu, X, Building2, ExternalLink,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const sidebarLinks = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/dashboard/profile', label: 'My Profile', icon: IdCard, end: false },
-  { to: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen, end: false },
+  { to: '/superintendent', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/superintendent/requests', label: 'Booking Requests', icon: ClipboardList, end: false },
+  { to: '/superintendent/students', label: 'Residents', icon: Users, end: false },
+  { to: '/superintendent/beds', label: 'Bed Map', icon: BedDouble, end: false },
 ];
 
-export default function StudentLayout() {
+export default function SuperintendentLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, isStudent } = useAuth();
+  const { user, logout, isSuperintendent } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) {
+  if (!user || !isSuperintendent) {
     return <Navigate to="/login" replace />;
   }
 
@@ -32,27 +36,21 @@ export default function StudentLayout() {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* User info */}
+      {/* Hostel branding */}
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
-            <User className="h-5 w-5 text-emerald-700" />
+            <Building2 className="h-5 w-5 text-emerald-700" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-            {(user.profile?.registrationNumber || user.studentId) && (
-              <p className="text-xs text-gray-500 truncate">{user.profile?.registrationNumber || user.studentId}</p>
-            )}
+            <p className="text-sm font-bold text-gray-900 truncate">{user.hostelName}</p>
+            <p className="text-xs text-gray-500">Superintendent Portal</p>
           </div>
         </div>
-        {(user.profile?.program || user.program) && (
-          <span className="mt-3 inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
-            {user.profile?.program || user.program}
-          </span>
-        )}
+        <p className="text-[11px] text-gray-400 mt-3 truncate">{user.name}</p>
       </div>
 
-      {/* Nav links */}
+      {/* Nav */}
       <nav className="flex-1 p-4 space-y-1">
         {sidebarLinks.map((link) => (
           <NavLink
@@ -68,7 +66,7 @@ export default function StudentLayout() {
         ))}
       </nav>
 
-      {/* View Site + Logout */}
+      {/* Footer */}
       <div className="p-4 border-t border-gray-100 space-y-1">
         <NavLink
           to="/"
@@ -90,25 +88,17 @@ export default function StudentLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Desktop sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200">
         <SidebarContent />
       </aside>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="fixed inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
           <aside className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-50">
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <span className="text-sm font-semibold text-gray-900">Menu</span>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="p-1 rounded-md text-gray-400 hover:text-gray-600"
-              >
+              <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-md text-gray-400 hover:text-gray-600">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -117,17 +107,12 @@ export default function StudentLayout() {
         </div>
       )}
 
-      {/* Main content */}
       <div className="flex-1 md:ml-64">
-        {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md text-gray-600 hover:bg-gray-100">
             <Menu className="h-5 w-5" />
           </button>
-          <span className="text-sm font-semibold text-gray-900">Student Portal</span>
+          <span className="text-sm font-semibold text-gray-900 truncate max-w-[60%]">{user.hostelName}</span>
           <div className="w-9" />
         </div>
 

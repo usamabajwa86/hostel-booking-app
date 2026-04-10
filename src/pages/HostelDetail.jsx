@@ -165,7 +165,6 @@ export default function HostelDetail() {
     );
   }
 
-  const isFemale = hostel.type === 'female';
   const totalRooms = hostel.rooms ? hostel.rooms.length : (hostel.ugRooms || 0) + (hostel.pgRooms || 0) || hostel.totalRooms || 0;
   const totalBeds = hostel.rooms ? hostel.rooms.reduce((s, r) => s + (r.beds?.length || 0), 0) : (hostel.totalBeds || hostel.totalCapacity || hostel.capacity || 0);
 
@@ -233,18 +232,14 @@ export default function HostelDetail() {
           </nav>
 
           <div className="flex items-center gap-4 flex-wrap">
-            <div className={`h-14 w-14 rounded-2xl ${isFemale ? 'bg-pink-500/20' : 'bg-blue-500/20'} flex items-center justify-center`}>
+            <div className="h-14 w-14 rounded-2xl bg-pink-500/20 flex items-center justify-center">
               <Building2 className="h-7 w-7" />
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold">{hostel.name}</h1>
               <div className="flex items-center gap-2 mt-2">
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    isFemale ? 'bg-pink-200 text-pink-800' : 'bg-blue-200 text-blue-800'
-                  }`}
-                >
-                  {isFemale ? 'Female' : 'Male'}
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-pink-200 text-pink-800">
+                  Female
                 </span>
                 {hostel.category && (
                   <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/20 text-white">

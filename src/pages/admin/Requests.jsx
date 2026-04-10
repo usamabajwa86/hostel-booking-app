@@ -269,24 +269,57 @@ export default function Requests() {
         </div>
       </div>
 
-      {/* ID Card Modal */}
-      <Modal isOpen={!!selectedReq} onClose={() => setSelectedReq(null)} title="Student Details">
+      {/* Booking Detail Modal */}
+      <Modal isOpen={!!selectedReq} onClose={() => setSelectedReq(null)} title="Booking Details">
         {selectedReq && (
           <div className="space-y-4">
-            {selectedReq.idCardImage && (
-              <div className="rounded-lg overflow-hidden border border-gray-200">
-                <img src={`${SERVER}/${selectedReq.idCardImage}`} alt="ID Card" className="w-full h-auto object-contain max-h-64" />
-              </div>
-            )}
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="font-medium text-gray-500">Name</span><p className="text-gray-900">{selectedReq.userName || "N/A"}</p></div>
               <div><span className="font-medium text-gray-500">Email</span><p className="text-gray-900">{selectedReq.userEmail || "N/A"}</p></div>
-              <div><span className="font-medium text-gray-500">Student ID</span><p className="text-gray-900">{selectedReq.studentId || "N/A"}</p></div>
+              <div><span className="font-medium text-gray-500">Reg / Student ID</span><p className="text-gray-900 font-mono text-xs">{selectedReq.registrationNumber || selectedReq.studentId || "N/A"}</p></div>
+              <div><span className="font-medium text-gray-500">Type</span>
+                <p>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    selectedReq.semesterStatus === 'first' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {selectedReq.semesterStatus === 'first' ? '1st Semester' : selectedReq.semesterStatus === 'senior' ? 'Senior' : '—'}
+                  </span>
+                </p>
+              </div>
               <div><span className="font-medium text-gray-500">Hostel</span><p className="text-gray-900">{selectedReq.hostelName || "N/A"}</p></div>
               <div><span className="font-medium text-gray-500">Room</span><p className="text-gray-900">{selectedReq.roomNumber || "N/A"}</p></div>
-              <div><span className="font-medium text-gray-500">Bed</span><p className="text-gray-900">{selectedReq.bedId || "N/A"}</p></div>
+              <div><span className="font-medium text-gray-500">Bed</span><p className="text-gray-900 font-mono text-xs">{selectedReq.bedId || "N/A"}</p></div>
+              <div><span className="font-medium text-gray-500">Status</span><div><StatusBadge status={selectedReq.status} /></div></div>
             </div>
-            <div className="flex items-center gap-2"><StatusBadge status={selectedReq.status} /></div>
+
+            {/* Challan details (1st semester) */}
+            {selectedReq.challan && (
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <p className="text-sm font-semibold text-blue-900 mb-2">Bank Challan</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div><span className="text-blue-600">Bank:</span> <span className="text-blue-900 font-medium">{selectedReq.challan.bankName}</span></div>
+                  <div><span className="text-blue-600">Amount:</span> <span className="text-blue-900 font-medium">Rs. {selectedReq.challan.paidAmount}</span></div>
+                  <div><span className="text-blue-600">Challan #:</span> <span className="text-blue-900 font-medium">{selectedReq.challan.challanNumber}</span></div>
+                  <div><span className="text-blue-600">Branch:</span> <span className="text-blue-900 font-medium">{selectedReq.challan.bankBranch}</span></div>
+                  <div className="col-span-2"><span className="text-blue-600">Submitted on:</span> <span className="text-blue-900 font-medium">{selectedReq.challan.submissionDate}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Voucher image */}
+            {selectedReq.idCardImage && (
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Paid Voucher</p>
+                <a href={`${SERVER}/${selectedReq.idCardImage}`} target="_blank" rel="noreferrer">
+                  <img
+                    src={`${SERVER}/${selectedReq.idCardImage}`}
+                    alt="Paid Voucher"
+                    className="w-full max-h-64 object-contain rounded-lg border border-gray-200 hover:opacity-90 transition"
+                  />
+                </a>
+              </div>
+            )}
+
             {selectedReq.status === "pending" && (
               <div className="flex gap-3 pt-2 border-t border-gray-100">
                 <button onClick={() => handleStatus(selectedReq.id, "approved")} className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">

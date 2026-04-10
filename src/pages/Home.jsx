@@ -76,7 +76,7 @@ const features = [
   {
     icon: Star,
     title: 'Women-Only Hostels',
-    desc: '14 dedicated female hostels with 4,562+ beds ensuring a safe and comfortable stay.',
+    desc: '17 dedicated female hostels with 5,087+ beds ensuring a safe and comfortable stay.',
   },
   {
     icon: MapPin,
@@ -461,8 +461,8 @@ export default function Home() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {hostels.map((h, i) => {
-                const totalBeds = h.rooms ? h.rooms.reduce((sum, r) => sum + r.beds.length, 0) : h.capacity;
-                const isFemale = h.type === 'female';
+                const totalBeds = h.rooms ? h.rooms.reduce((sum, r) => sum + (r.beds?.length || 0), 0) : (h.totalCapacity || h.capacity || 0);
+                const totalRoomsCard = h.rooms?.length || h.totalRooms || 0;
                 return (
                   <Link
                     key={h.id}
@@ -475,19 +475,15 @@ export default function Home() {
                     style={{ transitionDelay: `${i * 100}ms` }}
                   >
                     {/* Top gradient bar */}
-                    <div className={`h-2 ${isFemale ? 'bg-gradient-to-r from-pink-400 to-pink-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'}`} />
+                    <div className="h-2 bg-gradient-to-r from-pink-400 to-pink-500" />
 
                     <div className="p-5">
                       <div className="flex items-start justify-between mb-3">
-                        <div className={`inline-flex items-center justify-center h-10 w-10 rounded-xl ${isFemale ? 'bg-pink-50 text-pink-600' : 'bg-blue-50 text-blue-600'}`}>
+                        <div className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-pink-50 text-pink-600">
                           <Building2 className="h-5 w-5" />
                         </div>
-                        <span
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                            isFemale ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700'
-                          }`}
-                        >
-                          {isFemale ? 'Female' : 'Male'}
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-pink-100 text-pink-700">
+                          Female
                         </span>
                       </div>
 
@@ -503,7 +499,7 @@ export default function Home() {
                           <BedDouble className="h-4 w-4" />
                           {totalBeds} beds
                         </span>
-                        <span>{h.totalRooms} rooms</span>
+                        <span>{totalRoomsCard} rooms</span>
                       </div>
 
                       <div className="flex items-center gap-1.5 text-emerald-600 text-sm font-semibold group-hover:gap-2.5 transition-all">

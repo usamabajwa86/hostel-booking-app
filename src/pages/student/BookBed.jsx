@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { BedDouble, Building2, DoorOpen, Loader2, CheckCircle2 } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  BedDouble, Building2, DoorOpen, Loader2, CheckCircle2,
+  AlertTriangle, Hash,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
 import BedGrid from '../../components/ui/BedGrid';
@@ -11,14 +14,15 @@ const API = '/api';
 
 export default function BookBed() {
   const { hostelId } = useParams();
-  const { user } = useAuth();
+  const { user, isProfileComplete } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [hostel, setHostel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedBed, setSelectedBed] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [idCardImage, setIdCardImage] = useState(null);
+  const [voucherImage, setVoucherImage] = useState(null);
   const [challan, setChallan] = useState({
     bankName: '',
     paidAmount: '',
@@ -29,6 +33,11 @@ export default function BookBed() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
+
+  // Determine semester status from profile
+  const semesterStatus = user?.profile?.semesterStatus || 'first';
+  const isFirstSemester = semesterStatus === 'first';
+  const registrationNumber = user?.profile?.registrationNumber || '';
 
   const fetchHostel = useCallback(async () => {
     try {
@@ -46,9 +55,7 @@ export default function BookBed() {
     try {
       const res = await fetch(`${API}/requests?userId=${user.id}`);
       const data = await res.json();
-      const pending = Array.isArray(data)
-        ? data.some((r) => r.status === 'pending')
-        : false;
+      const pending = Array.isArray(data) ? data.some((r) => r.status === 'pending') : false;
       setHasPendingRequest(pending);
     } catch (err) {
       console.error('Failed to check pending requests:', err);
@@ -61,6 +68,15 @@ export default function BookBed() {
   }, [fetchHostel, checkPendingRequest]);
 
   const handleBedClick = (bed, roomNumber) => {
+    if (!isProfileComplete) {
+      toast({
+        title: 'Complete your profile first',
+        description: 'Please fill in your student profile before booking a bed.',
+        variant: 'warning',
+      });
+      navigate('/dashboard/profile');
+      return;
+    }
     if (hasPendingRequest) {
       toast({
         title: 'Booking Restricted',
@@ -70,38 +86,57 @@ export default function BookBed() {
       return;
     }
     setSelectedBed({ ...bed, roomNumber });
-    setIdCardImage(null);
+    setVoucherImage(null);
     setChallan({ bankName: '', paidAmount: '', challanNumber: '', bankBranch: '', submissionDate: '' });
     setModalOpen(true);
   };
 
-  const isChallanValid = challan.bankName && challan.paidAmount && challan.challanNumber && challan.bankBranch && challan.submissionDate;
+  const isChallanValid =
+    challan.bankName &&
+    challan.paidAmount &&
+    challan.challanNumber &&
+    challan.bankBranch &&
+    challan.submissionDate;
+
+  const canSubmit = () => {
+    if (!selectedBed) return false;
+    if (isFirstSemester) return isChallanValid && voucherImage;
+    return Boolean(registrationNumber);
+  };
 
   const handleConfirmBooking = async () => {
-    if ((!idCardImage && !isChallanValid) || !selectedBed) return;
+    if (!canSubmit()) return;
 
     setSubmitting(true);
     try {
+      const payload = {
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        studentId: registrationNumber || user.studentId || '',
+        hostelId,
+        hostelName: hostel.name,
+        roomNumber: selectedBed.roomNumber,
+        bedId: selectedBed.id,
+        semesterStatus,
+      };
+
+      if (isFirstSemester) {
+        payload.idCardImage = voucherImage || '';
+        payload.challan = challan;
+      } else {
+        payload.registrationNumber = registrationNumber;
+      }
+
       const res = await fetch(`${API}/requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          userName: user.name,
-          userEmail: user.email,
-          studentId: user.studentId || '',
-          hostelId,
-          hostelName: hostel.name,
-          roomNumber: selectedBed.roomNumber,
-          bedId: selectedBed.id,
-          idCardImage: idCardImage || '',
-          challan: isChallanValid ? challan : undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Booking request failed');
+        throw new Error(err.error || err.message || 'Booking request failed');
       }
 
       const result = await res.json();
@@ -121,7 +156,6 @@ export default function BookBed() {
         variant: 'success',
       });
 
-      // Refresh data
       fetchHostel();
       checkPendingRequest();
     } catch (err) {
@@ -155,11 +189,36 @@ export default function BookBed() {
     );
   }
 
-  const totalRooms = hostel.rooms?.length || hostel.totalRooms || 0;
-  const totalBeds = hostel.capacity || hostel.totalBeds || 0;
-  const vacantBeds = hostel.vacantBeds ?? hostel.vacant ?? 0;
+  // Profile gate
+  if (!isProfileComplete) {
+    return (
+      <div className="max-w-xl mx-auto">
+        <div className="bg-white rounded-2xl border border-amber-200 shadow-sm p-8 text-center">
+          <div className="h-14 w-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Complete your profile first</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Hostel booking is locked until you provide your full student profile (degree, semester, CNIC, contact). This information is required only once.
+          </p>
+          <Link
+            to="/dashboard/profile"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
+          >
+            Complete Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-  // If confirmation is shown
+  const totalRooms = hostel.rooms?.length || 0;
+  const totalBeds = (hostel.rooms || []).reduce((s, r) => s + (r.beds?.length || 0), 0);
+  const vacantBeds = (hostel.rooms || []).reduce(
+    (s, r) => s + (r.beds || []).filter(b => !b.status || b.status === 'vacant').length,
+    0
+  );
+
   if (confirmation) {
     return (
       <div className="max-w-lg mx-auto">
@@ -169,7 +228,7 @@ export default function BookBed() {
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Booking Request Submitted</h2>
           <p className="text-sm text-gray-500 mb-6">
-            Your request is being reviewed by the administration.
+            Your request is being reviewed by the hostel superintendent.
           </p>
 
           <div className="bg-gray-50 rounded-lg p-4 text-left space-y-3 text-sm">
@@ -293,71 +352,106 @@ export default function BookBed() {
             </div>
           </div>
 
-          {/* Bank / Challan Details */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700">Bank / Challan Details <span className="text-red-500">*</span></h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Bank Name</label>
-                <input
-                  type="text"
-                  value={challan.bankName}
-                  onChange={(e) => setChallan({ ...challan, bankName: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="e.g. HBL, MCB"
-                />
+          {/* Branch on semester status */}
+          {isFirstSemester ? (
+            <>
+              <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700">
+                <strong>1st semester student</strong> — please provide your bank challan details and upload the paid voucher.
               </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Total Paid Amount</label>
-                <input
-                  type="text"
-                  value={challan.paidAmount}
-                  onChange={(e) => setChallan({ ...challan, paidAmount: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="e.g. 5000"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Challan Number</label>
-              <input
-                type="text"
-                value={challan.challanNumber}
-                onChange={(e) => setChallan({ ...challan, challanNumber: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                placeholder="Enter challan number"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Bank Branch</label>
-                <input
-                  type="text"
-                  value={challan.bankBranch}
-                  onChange={(e) => setChallan({ ...challan, bankBranch: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Branch name"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Submission Date</label>
-                <input
-                  type="date"
-                  value={challan.submissionDate}
-                  onChange={(e) => setChallan({ ...challan, submissionDate: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
-          </div>
 
-          {/* Upload paid voucher */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Paid Voucher Image <span className="text-red-500">*</span>
-            </label>
-            <IdCardUpload value={idCardImage} onChange={setIdCardImage} />
-          </div>
+              {/* Bank / Challan Details */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Bank / Challan Details <span className="text-red-500">*</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Bank Name</label>
+                    <input
+                      type="text"
+                      value={challan.bankName}
+                      onChange={(e) => setChallan({ ...challan, bankName: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="e.g. HBL, MCB"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Total Paid Amount</label>
+                    <input
+                      type="text"
+                      value={challan.paidAmount}
+                      onChange={(e) => setChallan({ ...challan, paidAmount: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="e.g. 5000"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Challan Number</label>
+                  <input
+                    type="text"
+                    value={challan.challanNumber}
+                    onChange={(e) => setChallan({ ...challan, challanNumber: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Enter challan number"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Bank Branch</label>
+                    <input
+                      type="text"
+                      value={challan.bankBranch}
+                      onChange={(e) => setChallan({ ...challan, bankBranch: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="Branch name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Submission Date</label>
+                    <input
+                      type="date"
+                      value={challan.submissionDate}
+                      onChange={(e) => setChallan({ ...challan, submissionDate: e.target.value })}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload paid voucher */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Upload Paid Voucher Image <span className="text-red-500">*</span>
+                </label>
+                <IdCardUpload value={voucherImage} onChange={setVoucherImage} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-3 text-xs text-emerald-700">
+                <strong>Senior student</strong> — your university registration number from your profile will be used to process this booking.
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
+                    <Hash className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Registration Number</p>
+                    <p className="text-base font-bold text-gray-900 font-mono">{registrationNumber}</p>
+                  </div>
+                </div>
+              </div>
+              {!registrationNumber && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                  No registration number found in your profile.{' '}
+                  <Link to="/dashboard/profile" className="font-semibold underline">Update your profile</Link>{' '}
+                  first.
+                </div>
+              )}
+            </>
+          )}
 
           <div className="flex gap-3 pt-2">
             <button
@@ -369,7 +463,7 @@ export default function BookBed() {
             </button>
             <button
               onClick={handleConfirmBooking}
-              disabled={(!isChallanValid && !idCardImage) || submitting}
+              disabled={!canSubmit() || submitting}
               className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (

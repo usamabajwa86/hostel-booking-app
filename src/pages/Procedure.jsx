@@ -9,65 +9,68 @@ import {
   FileText,
   AlertTriangle,
   Clock,
+  IdCard,
+  Mail,
 } from 'lucide-react';
 
 const steps = [
   {
     num: 1,
-    title: 'Create Account',
-    desc: 'Register with your student details including name, student ID, email, gender, and program.',
+    title: 'Create Account & Verify Email',
+    desc: 'Register with your name, email and password. Confirm your email with the 6-digit verification code.',
     icon: UserPlus,
   },
   {
     num: 2,
-    title: 'Browse Hostels',
-    desc: 'View eligible hostels based on your gender and academic program (UG/PG/Scholar).',
-    icon: Search,
+    title: 'Complete Student Profile',
+    desc: 'Provide your degree, current semester, CNIC, contact details and registration number (if applicable).',
+    icon: IdCard,
   },
   {
     num: 3,
+    title: 'Browse Hostels',
+    desc: 'View eligible female hostels with photos, room types and live bed availability.',
+    icon: Search,
+  },
+  {
+    num: 4,
     title: 'Select Room & Bed',
     desc: 'Choose a vacant bed from the interactive room grid of your selected hostel.',
     icon: BedDouble,
   },
   {
-    num: 4,
-    title: 'Upload ID Card',
-    desc: 'Upload your student ID card image (PNG/JPG, max 5 MB) for verification.',
-    icon: Upload,
-  },
-  {
     num: 5,
-    title: 'Submit Request',
-    desc: 'Confirm your selection and submit your booking request for admin review.',
+    title: 'Submit Booking Details',
+    desc: '1st semester students upload bank challan + voucher. Senior students use their university registration number.',
     icon: SendHorizonal,
   },
   {
     num: 6,
-    title: 'Get Approval',
-    desc: 'Admin reviews your request and approves or rejects it within 2-3 working days.',
+    title: 'Hostel Superintendent Review',
+    desc: 'The superintendent of your selected hostel reviews your request and approves it within 2-3 working days.',
     icon: CheckCircle,
   },
 ];
 
 const eligibility = [
-  'Gender-based filtering ensures you only see hostels designated for your gender.',
-  'Program-based room types — UG, PG, and Scholar rooms are allocated separately.',
-  'Only currently enrolled UAF students are eligible to apply.',
+  'All UAF women hostels are open to currently enrolled female students.',
+  'Program-based filtering — Undergraduate, Postgraduate and PhD/Scholar rooms are allocated based on your profile.',
+  'Profile completion is mandatory before any booking request can be submitted.',
 ];
 
 const documents = [
-  'Student ID Card (front side, clear image)',
-  'Accepted formats: PNG or JPG',
-  'Maximum file size: 5 MB',
+  '1st semester: bank challan number, paid amount, branch and submission date + scanned voucher',
+  'Senior students: university registration number from your profile',
+  'Profile fields: CNIC, phone, address, degree, semester, department',
 ];
 
 const rules = [
   'Only one pending booking request is allowed at a time.',
-  'You must upload a valid student ID card with your booking.',
+  'Your student profile must be complete before any booking can be submitted.',
+  '1st semester students must provide complete bank challan details and upload the paid voucher.',
+  '2nd semester and senior students must enter their university registration number in their profile.',
   'False information may lead to cancellation and disciplinary action.',
   'Approved bookings are valid for the current academic session only.',
-  'Room changes require a new booking request after cancelling the existing one.',
 ];
 
 export default function Procedure() {
@@ -187,7 +190,7 @@ export default function Procedure() {
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">2</span>
-                <span>Admin reviews documents and eligibility</span>
+                <span>Hostel superintendent reviews documents and eligibility</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">3</span>

@@ -1,20 +1,162 @@
 [
   {
     "id": "admin-1",
-    "name": "Admin",
+    "name": "UAF Hostel Admin",
     "email": "admin@hostels.edu",
     "password": "admin123",
     "role": "admin"
   },
   {
-    "id": "s1774354869086",
-    "name": "if",
-    "email": "abc@gmail.com",
-    "password": "123456",
-    "studentId": "34545",
-    "gender": "female",
-    "program": "PG",
-    "role": "student",
-    "registeredAt": "2026-03-24T12:21:09.086Z"
+    "id": "sup-sir-syed",
+    "name": "Superintendent Sir Syed Hall",
+    "email": "sirsyed@hostels.edu",
+    "password": "sir-syed123",
+    "role": "superintendent",
+    "hostelId": "sir-syed",
+    "hostelName": "Sir Syed Hall"
+  },
+  {
+    "id": "sup-liaquat",
+    "name": "Superintendent Liaquat Hall",
+    "email": "liaquat@hostels.edu",
+    "password": "liaquat123",
+    "role": "superintendent",
+    "hostelId": "liaquat",
+    "hostelName": "Liaquat Hall"
+  },
+  {
+    "id": "sup-teepu",
+    "name": "Superintendent Teepu Hall",
+    "email": "teepu@hostels.edu",
+    "password": "teepu123",
+    "role": "superintendent",
+    "hostelId": "teepu",
+    "hostelName": "Teepu Hall"
+  },
+  {
+    "id": "sup-qazafi",
+    "name": "Superintendent Qazafi Hall",
+    "email": "qazafi@hostels.edu",
+    "password": "qazafi123",
+    "role": "superintendent",
+    "hostelId": "qazafi",
+    "hostelName": "Qazafi Hall"
+  },
+  {
+    "id": "sup-kehkashan",
+    "name": "Superintendent Kehkashan Hall",
+    "email": "kehkashan@hostels.edu",
+    "password": "kehkashan123",
+    "role": "superintendent",
+    "hostelId": "kehkashan",
+    "hostelName": "Kehkashan Hall"
+  },
+  {
+    "id": "sup-khadija",
+    "name": "Superintendent Khadija Hall",
+    "email": "khadija@hostels.edu",
+    "password": "khadija123",
+    "role": "superintendent",
+    "hostelId": "khadija",
+    "hostelName": "Khadija Hall"
+  },
+  {
+    "id": "sup-zainab",
+    "name": "Superintendent Zainab Hall",
+    "email": "zainab@hostels.edu",
+    "password": "zainab123",
+    "role": "superintendent",
+    "hostelId": "zainab",
+    "hostelName": "Zainab Hall"
+  },
+  {
+    "id": "sup-ayesha",
+    "name": "Superintendent Ayesha Hall",
+    "email": "ayesha@hostels.edu",
+    "password": "ayesha123",
+    "role": "superintendent",
+    "hostelId": "ayesha",
+    "hostelName": "Ayesha Hall"
+  },
+  {
+    "id": "sup-amna",
+    "name": "Superintendent Amna Hall",
+    "email": "amna@hostels.edu",
+    "password": "amna123",
+    "role": "superintendent",
+    "hostelId": "amna",
+    "hostelName": "Amna Hall"
+  },
+  {
+    "id": "sup-fatima-a",
+    "name": "Superintendent Fatima Hall Block A",
+    "email": "fatimaa@hostels.edu",
+    "password": "fatima-a123",
+    "role": "superintendent",
+    "hostelId": "fatima-a",
+    "hostelName": "Fatima Hall Block A"
+  },
+  {
+    "id": "sup-fatima-b",
+    "name": "Superintendent Fatima Hall Block B",
+    "email": "fatimab@hostels.edu",
+    "password": "fatima-b123",
+    "role": "superintendent",
+    "hostelId": "fatima-b",
+    "hostelName": "Fatima Hall Block B"
+  },
+  {
+    "id": "sup-maryam-a",
+    "name": "Superintendent Maryam Hall Block A",
+    "email": "maryama@hostels.edu",
+    "password": "maryam-a123",
+    "role": "superintendent",
+    "hostelId": "maryam-a",
+    "hostelName": "Maryam Hall Block A"
+  },
+  {
+    "id": "sup-maryam-b",
+    "name": "Superintendent Maryam Hall Block B",
+    "email": "maryamb@hostels.edu",
+    "password": "maryam-b123",
+    "role": "superintendent",
+    "hostelId": "maryam-b",
+    "hostelName": "Maryam Hall Block B"
+  },
+  {
+    "id": "sup-maryam-c",
+    "name": "Superintendent Maryam Hall Block C",
+    "email": "maryamc@hostels.edu",
+    "password": "maryam-c123",
+    "role": "superintendent",
+    "hostelId": "maryam-c",
+    "hostelName": "Maryam Hall Block C"
+  },
+  {
+    "id": "sup-erdogan",
+    "name": "Superintendent Erdogan Hall",
+    "email": "erdogan@hostels.edu",
+    "password": "erdogan123",
+    "role": "superintendent",
+    "hostelId": "erdogan",
+    "hostelName": "Erdogan Hall"
+  },
+  {
+    "id": "sup-arnic",
+    "name": "Superintendent Arnic Hall",
+    "email": "arnic@hostels.edu",
+    "password": "arnic123",
+    "role": "superintendent",
+    "hostelId": "arnic",
+    "hostelName": "Arnic Hall"
+  },
+  {
+    "id": "sup-khalid",
+    "name": "Superintendent Khalid Hall",
+    "email": "khalid@hostels.edu",
+    "password": "khalid123",
+    "role": "superintendent",
+    "hostelId": "khalid",
+    "hostelName": "Khalid Hall"
   }
 ]

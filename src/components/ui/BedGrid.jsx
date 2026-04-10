@@ -108,7 +108,7 @@ export default function BedGrid({ rooms = [], onBedClick }) {
                       {roomTypeLabel}
                     </span>
                   )}
-                  {room.floor && (
+                  {room.floor && room.floor !== 'Not specified' && (
                     <span className="text-[10px] text-gray-400 font-medium">
                       {room.floor}
                     </span>

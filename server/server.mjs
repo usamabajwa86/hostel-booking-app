@@ -46,6 +46,29 @@ function writeJSON(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
+// ============================================================
+// In-memory OTP store (for mock email verification)
+// Production would use Redis + actual SMTP delivery (SendGrid/SES)
+// ============================================================
+const otpStore = new Map(); // email -> { code, expiresAt }
+
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function isProfileComplete(user) {
+  if (!user) return false;
+  return Boolean(
+    user.profile &&
+    user.profile.degreeName &&
+    user.profile.semester &&
+    user.profile.cnic &&
+    user.profile.phone &&
+    user.profile.fatherName &&
+    user.profile.address
+  );
+}
+
 function mergeBedStatuses(hostels, requests) {
   const bedStatusMap = {};
   const bedOccupantMap = {};
@@ -72,42 +95,109 @@ function mergeBedStatuses(hostels, requests) {
   }));
 }
 
+function safeUser(user) {
+  if (!user) return null;
+  // eslint-disable-next-line no-unused-vars
+  const { password, ...rest } = user;
+  return rest;
+}
+
 // =====================
-// AUTH
+// AUTH — MOCK EMAIL OTP (for university dev/demo)
 // =====================
 
+// POST /api/auth/send-otp — generate a 6-digit code and "send" it
+// In demo mode the code is returned directly so the UI can show it on screen.
+app.post('/api/auth/send-otp', (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const code = generateOtp();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    otpStore.set(email.toLowerCase(), { code, expiresAt });
+
+    // Demo mode: return the code directly so the UI can show it on screen
+    res.json({
+      message: 'OTP generated. In production this would be emailed to you.',
+      demoCode: code,
+      expiresInMinutes: 10,
+    });
+  } catch (err) {
+    console.error('Send OTP error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/auth/verify-otp — confirm the code matches and is not expired
+app.post('/api/auth/verify-otp', (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
+
+    const entry = otpStore.get(email.toLowerCase());
+    if (!entry) return res.status(404).json({ error: 'No verification code requested for this email' });
+    if (Date.now() > entry.expiresAt) {
+      otpStore.delete(email.toLowerCase());
+      return res.status(410).json({ error: 'Verification code expired. Request a new one.' });
+    }
+    if (entry.code !== code) return res.status(401).json({ error: 'Incorrect verification code' });
+
+    // Code is valid — keep it usable for the registration call
+    res.json({ message: 'Verification successful', verified: true });
+  } catch (err) {
+    console.error('Verify OTP error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/auth/register — only succeeds if OTP was verified
 app.post('/api/auth/register', (req, res) => {
   try {
-    const { name, email, password, gender, program } = req.body;
-    if (!name || !email || !password || !program) {
-      return res.status(400).json({ error: 'Name, email, password, and program are required' });
+    const { name, email, password, gender, otp } = req.body;
+    if (!name || !email || !password || !otp) {
+      return res.status(400).json({ error: 'Name, email, password and verification code are required' });
+    }
+
+    // Verify OTP one more time before creating the account
+    const otpEntry = otpStore.get(email.toLowerCase());
+    if (!otpEntry || otpEntry.code !== otp) {
+      return res.status(401).json({ error: 'Invalid or missing verification code' });
+    }
+    if (Date.now() > otpEntry.expiresAt) {
+      otpStore.delete(email.toLowerCase());
+      return res.status(410).json({ error: 'Verification code expired. Please restart registration.' });
     }
 
     const users = readJSON(USERS_FILE);
-    if (users.find(u => u.email === email)) {
+    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
       return res.status(409).json({ error: 'Email already registered' });
     }
 
     const newUser = {
       id: `s${Date.now()}`,
-      name, email, password,
+      name,
+      email,
+      password,
       gender: gender || 'female',
-      program,
       role: 'student',
-      registeredAt: new Date().toISOString()
+      emailVerified: true,
+      profile: null, // student must complete profile before booking
+      registeredAt: new Date().toISOString(),
     };
 
     users.push(newUser);
     writeJSON(USERS_FILE, users);
+    otpStore.delete(email.toLowerCase()); // burn the OTP
 
-    const { password: _, ...safeUser } = newUser;
-    res.status(201).json(safeUser);
+    res.status(201).json(safeUser(newUser));
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
+// POST /api/auth/login — also returns superintendent's hostel info
 app.post('/api/auth/login', (req, res) => {
   try {
     const { email, password } = req.body;
@@ -116,15 +206,63 @@ app.post('/api/auth/login', (req, res) => {
     }
 
     const users = readJSON(USERS_FILE);
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const { password: _, ...safeUser } = user;
-    res.json(safeUser);
+    res.json(safeUser(user));
   } catch (err) {
     console.error('Login error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// =====================
+// USER PROFILE
+// =====================
+
+// PATCH /api/users/:id/profile — student updates their profile
+app.patch('/api/users/:id/profile', (req, res) => {
+  try {
+    const users = readJSON(USERS_FILE);
+    const idx = users.findIndex(u => u.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: 'User not found' });
+
+    const profileFields = [
+      'fatherName', 'cnic', 'phone', 'address', 'degreeName',
+      'semester', 'department', 'enrollmentYear', 'program',
+      'semesterStatus', // 'first' | 'senior'
+      'registrationNumber', // required for senior students
+    ];
+
+    const profile = users[idx].profile || {};
+    for (const key of profileFields) {
+      if (req.body[key] !== undefined) profile[key] = req.body[key];
+    }
+
+    users[idx].profile = profile;
+    // Also mirror commonly read fields at the top level for convenience
+    if (profile.program) users[idx].program = profile.program;
+    if (profile.registrationNumber) users[idx].studentId = profile.registrationNumber;
+
+    writeJSON(USERS_FILE, users);
+    res.json(safeUser(users[idx]));
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/users/:id — fetch latest user (used after profile update)
+app.get('/api/users/:id', (req, res) => {
+  try {
+    const users = readJSON(USERS_FILE);
+    const user = users.find(u => u.id === req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(safeUser(user));
+  } catch (err) {
+    console.error('Get user error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -166,9 +304,35 @@ app.get('/api/hostels/:id', (req, res) => {
 
 app.post('/api/requests', (req, res) => {
   try {
-    const { userId, userName, userEmail, studentId, hostelId, hostelName, roomNumber, bedId, idCardImage, challan } = req.body;
+    const {
+      userId, userName, userEmail, studentId, hostelId, hostelName,
+      roomNumber, bedId, idCardImage, challan, semesterStatus, registrationNumber,
+    } = req.body;
+
     if (!userId || !userName || !userEmail || !hostelId || !hostelName || !roomNumber || !bedId) {
       return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Enforce profile completion
+    const users = readJSON(USERS_FILE);
+    const user = users.find(u => u.id === userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!isProfileComplete(user)) {
+      return res.status(403).json({
+        error: 'Please complete your student profile before booking',
+        code: 'PROFILE_INCOMPLETE',
+      });
+    }
+
+    // Enforce challan vs registration ID logic
+    if (semesterStatus === 'first') {
+      if (!challan || !challan.challanNumber || !challan.bankName || !challan.paidAmount) {
+        return res.status(400).json({ error: 'First-semester students must provide complete challan details' });
+      }
+    } else if (semesterStatus === 'senior') {
+      if (!registrationNumber) {
+        return res.status(400).json({ error: 'Senior students must provide their registration number' });
+      }
     }
 
     const requests = readJSON(REQUESTS_FILE);
@@ -196,10 +360,13 @@ app.post('/api/requests', (req, res) => {
     const now = new Date().toISOString();
     const newRequest = {
       id: requestId,
-      userId, userName, userEmail, studentId: studentId || '',
+      userId, userName, userEmail,
+      studentId: studentId || registrationNumber || '',
       hostelId, hostelName, roomNumber, bedId,
       idCardImage: idCardPath,
       challan: challan || null,
+      semesterStatus: semesterStatus || (user.profile?.semesterStatus) || null,
+      registrationNumber: registrationNumber || null,
       status: 'pending',
       submittedAt: now,
       history: [
@@ -219,9 +386,11 @@ app.post('/api/requests', (req, res) => {
 app.get('/api/requests', (req, res) => {
   try {
     const requests = readJSON(REQUESTS_FILE);
-    const { userId } = req.query;
-    if (userId) return res.json(requests.filter(r => r.userId === userId));
-    res.json(requests);
+    const { userId, hostelId } = req.query;
+    let result = requests;
+    if (userId) result = result.filter(r => r.userId === userId);
+    if (hostelId) result = result.filter(r => r.hostelId === hostelId);
+    res.json(result);
   } catch (err) {
     console.error('Get requests error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -230,7 +399,7 @@ app.get('/api/requests', (req, res) => {
 
 app.patch('/api/requests/:id/status', (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, actorRole, actorName } = req.body;
     if (!status || !['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'Status must be "approved" or "rejected"' });
     }
@@ -244,10 +413,11 @@ app.patch('/api/requests/:id/status', (req, res) => {
     requests[index][status === 'approved' ? 'approvedAt' : 'rejectedAt'] = now;
 
     if (!requests[index].history) requests[index].history = [];
+    const actor = actorRole === 'superintendent' ? `${actorName || 'Superintendent'}` : 'Admin';
     requests[index].history.push({
       status,
       timestamp: now,
-      note: status === 'approved' ? 'Booking approved by admin' : 'Booking rejected by admin'
+      note: `Booking ${status} by ${actor}`,
     });
 
     writeJSON(REQUESTS_FILE, requests);
@@ -265,7 +435,6 @@ app.delete('/api/requests/:id', (req, res) => {
     if (index === -1) return res.status(404).json({ error: 'Request not found' });
 
     const now = new Date().toISOString();
-    // Instead of deleting, mark as vacated to keep history
     requests[index].status = 'vacated';
     requests[index].vacatedAt = now;
     if (!requests[index].history) requests[index].history = [];
@@ -279,6 +448,92 @@ app.delete('/api/requests/:id', (req, res) => {
     res.json({ message: 'Booking vacated', request: requests[index] });
   } catch (err) {
     console.error('Delete request error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// =====================
+// SUPERINTENDENT — per-hostel scoped endpoints
+// =====================
+
+// GET /api/superintendent/:hostelId/stats
+app.get('/api/superintendent/:hostelId/stats', (req, res) => {
+  try {
+    const { hostelId } = req.params;
+    const hostelsRaw = readJSON(HOSTELS_FILE);
+    const hostels = hostelsRaw.hostels || hostelsRaw;
+    const hostel = hostels.find(h => h.id === hostelId);
+    if (!hostel) return res.status(404).json({ error: 'Hostel not found' });
+
+    const requests = readJSON(REQUESTS_FILE).filter(r => r.hostelId === hostelId);
+    const totalBeds = (hostel.rooms || []).reduce((s, r) => s + (r.beds?.length || 0), 0);
+    const totalRooms = (hostel.rooms || []).length;
+    const approved = requests.filter(r => r.status === 'approved').length;
+    const pending = requests.filter(r => r.status === 'pending').length;
+    const ugRooms = (hostel.rooms || []).filter(r => (r.programCategory || '').toLowerCase() === 'undergraduate').length;
+    const pgRooms = (hostel.rooms || []).filter(r => (r.programCategory || '').toLowerCase() === 'postgraduate').length;
+
+    res.json({
+      hostelId,
+      hostelName: hostel.name,
+      totalBeds,
+      totalRooms,
+      approvedBookings: approved,
+      pendingRequests: pending,
+      vacantBeds: totalBeds - approved - pending,
+      ugRooms,
+      pgRooms,
+      occupancyPercent: totalBeds > 0 ? Math.round((approved / totalBeds) * 100) : 0,
+    });
+  } catch (err) {
+    console.error('Superintendent stats error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/superintendent/:hostelId/requests
+app.get('/api/superintendent/:hostelId/requests', (req, res) => {
+  try {
+    const { hostelId } = req.params;
+    const requests = readJSON(REQUESTS_FILE).filter(r => r.hostelId === hostelId);
+    res.json(requests);
+  } catch (err) {
+    console.error('Superintendent requests error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET /api/superintendent/:hostelId/students — students with bookings in this hostel
+app.get('/api/superintendent/:hostelId/students', (req, res) => {
+  try {
+    const { hostelId } = req.params;
+    const requests = readJSON(REQUESTS_FILE).filter(r => r.hostelId === hostelId && r.status !== 'rejected');
+    const users = readJSON(USERS_FILE);
+
+    const studentRows = requests.map(r => {
+      const u = users.find(x => x.id === r.userId);
+      return {
+        requestId: r.id,
+        userId: r.userId,
+        name: r.userName,
+        email: r.userEmail,
+        studentId: r.studentId,
+        registrationNumber: u?.profile?.registrationNumber || r.registrationNumber || null,
+        phone: u?.profile?.phone || null,
+        cnic: u?.profile?.cnic || null,
+        program: u?.profile?.program || u?.program || null,
+        semester: u?.profile?.semester || null,
+        degreeName: u?.profile?.degreeName || null,
+        roomNumber: r.roomNumber,
+        bedId: r.bedId,
+        status: r.status,
+        submittedAt: r.submittedAt,
+      };
+    });
+
+    res.json(studentRows);
+  } catch (err) {
+    console.error('Superintendent students error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -310,7 +565,7 @@ app.get('/api/admin/stats', (req, res) => {
       pendingRequests: pendingCount,
       approvedBookings: approvedCount,
       registeredStudents: users.filter(u => u.role === 'student').length,
-      totalRequests: requests.length
+      totalRequests: requests.length,
     });
   } catch (err) {
     console.error('Admin stats error:', err);
@@ -321,7 +576,7 @@ app.get('/api/admin/stats', (req, res) => {
 app.get('/api/users', (req, res) => {
   try {
     const users = readJSON(USERS_FILE);
-    res.json(users.map(({ password, ...rest }) => rest));
+    res.json(users.map(safeUser));
   } catch (err) {
     console.error('Get users error:', err);
     res.status(500).json({ error: 'Server error' });
@@ -334,13 +589,19 @@ app.get('/api/admin/export/students', (req, res) => {
     const users = readJSON(USERS_FILE).filter(u => u.role === 'student');
     const requests = readJSON(REQUESTS_FILE);
 
-    const headers = ['Name', 'Student ID', 'Email', 'Gender', 'Program', 'Registered', 'Booking Status', 'Hostel', 'Room', 'Bed'];
+    const headers = ['Name', 'Reg / Student ID', 'Email', 'Phone', 'CNIC', 'Program', 'Semester', 'Registered', 'Booking Status', 'Hostel', 'Room', 'Bed'];
     const rows = users.map(u => {
       const booking = requests.find(r => r.userId === u.id && r.status === 'approved');
       const pending = requests.find(r => r.userId === u.id && r.status === 'pending');
       const active = booking || pending;
       return [
-        u.name, u.studentId, u.email, u.gender, u.program,
+        u.name,
+        u.profile?.registrationNumber || u.studentId || '',
+        u.email,
+        u.profile?.phone || '',
+        u.profile?.cnic || '',
+        u.profile?.program || u.program || '',
+        u.profile?.semester || '',
         u.registeredAt || '',
         booking ? 'Approved' : pending ? 'Pending' : 'No Booking',
         active ? active.hostelName : '',

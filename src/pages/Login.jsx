@@ -37,7 +37,11 @@ export default function Login() {
       }
 
       login(userData);
-      navigate(userData.role === 'admin' ? '/admin' : '/dashboard');
+      const dest =
+        userData.role === 'admin' ? '/admin'
+        : userData.role === 'superintendent' ? '/superintendent'
+        : '/dashboard';
+      navigate(dest);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -61,13 +65,13 @@ export default function Login() {
         />
       </div>
 
-      {/* Back to Home */}
+      {/* Back to Website */}
       <Link
         to="/"
         className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-800 transition-colors bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-emerald-100"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Home
+        Back to Website
       </Link>
 
       <div className="w-full max-w-md relative z-10">
@@ -153,11 +157,21 @@ export default function Login() {
             </Link>
           </p>
 
-          {/* Admin hint */}
-          <div className="mt-6 p-3.5 bg-gray-50 rounded-xl text-center border border-gray-100">
-            <p className="text-xs text-gray-400">
-              Admin? <span className="font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">admin@hostels.edu</span> /{' '}
-              <span className="font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">admin123</span>
+          {/* Demo credentials hint */}
+          <div className="mt-6 p-3.5 bg-gray-50 rounded-xl border border-gray-100 space-y-1.5">
+            <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide text-center">Demo Credentials</p>
+            <p className="text-xs text-gray-500">
+              <span className="font-medium">Admin:</span>{' '}
+              <span className="font-mono text-gray-600 bg-white px-1.5 py-0.5 rounded">admin@hostels.edu</span> /{' '}
+              <span className="font-mono text-gray-600 bg-white px-1.5 py-0.5 rounded">admin123</span>
+            </p>
+            <p className="text-xs text-gray-500">
+              <span className="font-medium">Superintendent:</span>{' '}
+              <span className="font-mono text-gray-600 bg-white px-1.5 py-0.5 rounded">sirsyed@hostels.edu</span> /{' '}
+              <span className="font-mono text-gray-600 bg-white px-1.5 py-0.5 rounded">sir-syed123</span>
+            </p>
+            <p className="text-[10px] text-gray-400 text-center pt-1">
+              Each of the 17 hostels has its own superintendent login.
             </p>
           </div>
         </div>
