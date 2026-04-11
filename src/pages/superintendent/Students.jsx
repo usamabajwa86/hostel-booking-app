@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Users, Search } from 'lucide-react';
+import { Loader2, Users, Search, Heart, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const API = '/api';
@@ -89,7 +89,17 @@ export default function SuperintendentStudents() {
                 {filtered.map((r) => (
                   <tr key={r.requestId} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-gray-900">{r.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-gray-900">{r.name}</p>
+                        {r.medicalIllness && r.medicalIllness.toLowerCase() !== 'none' && (
+                          <span
+                            title={`Medical: ${r.medicalIllness}`}
+                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 text-[10px] font-semibold"
+                          >
+                            <Heart className="h-2.5 w-2.5" /> Medical
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-500">{r.email}</p>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700 font-mono text-xs">{r.registrationNumber || r.studentId || '—'}</td>
@@ -101,7 +111,16 @@ export default function SuperintendentStudents() {
                       <p>Room {r.roomNumber}</p>
                       <p className="text-xs text-gray-400 font-mono">{r.bedId}</p>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{r.phone || '—'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {r.phone ? (
+                        <p className="flex items-center gap-1">
+                          <Phone className="h-3 w-3 text-gray-400" /> {r.phone}
+                        </p>
+                      ) : '—'}
+                      {r.emergencyContact && (
+                        <p className="text-[11px] text-amber-600 mt-0.5">Emerg: {r.emergencyContact}</p>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                         r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :

@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Check, X, FileText, Hash, Calendar, Building2, Eye } from 'lucide-react';
+import {
+  Loader2, Check, X, FileText, Hash, Calendar, Eye,
+  Phone, ShieldAlert, Heart, IdCard, Users as UsersIcon,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
 import Modal from '../../components/ui/Modal';
@@ -227,6 +230,111 @@ export default function SuperintendentRequests() {
                 </p>
                 <p className="font-mono text-emerald-900">{selected.registrationNumber}</p>
               </div>
+            )}
+
+            {/* Student profile snapshot */}
+            {selected.profileSnapshot && (
+              <>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-1.5">
+                    <IdCard className="h-4 w-4 text-gray-500" /> Student Profile
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    {selected.profileSnapshot.fatherName && (
+                      <div>
+                        <p className="text-gray-500">Father's Name</p>
+                        <p className="font-medium text-gray-900">{selected.profileSnapshot.fatherName}</p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.cnic && (
+                      <div>
+                        <p className="text-gray-500">CNIC</p>
+                        <p className="font-medium text-gray-900 font-mono">{selected.profileSnapshot.cnic}</p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.phone && (
+                      <div>
+                        <p className="text-gray-500">Phone</p>
+                        <p className="font-medium text-gray-900 flex items-center gap-1">
+                          <Phone className="h-3 w-3" /> {selected.profileSnapshot.phone}
+                        </p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.degreeName && (
+                      <div>
+                        <p className="text-gray-500">Degree / Semester</p>
+                        <p className="font-medium text-gray-900">{selected.profileSnapshot.degreeName} · {selected.profileSnapshot.semester}</p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.address && (
+                      <div className="col-span-2">
+                        <p className="text-gray-500">Permanent Address</p>
+                        <p className="font-medium text-gray-900">{selected.profileSnapshot.address}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Emergency & Guardian */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm font-semibold text-amber-900 mb-3 flex items-center gap-1.5">
+                    <ShieldAlert className="h-4 w-4 text-amber-600" /> Emergency Contact &amp; Guardian
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    {selected.profileSnapshot.emergencyContact && (
+                      <div className="col-span-2">
+                        <p className="text-amber-700">Emergency Number</p>
+                        <p className="font-bold text-amber-900 text-sm flex items-center gap-1">
+                          <Phone className="h-3.5 w-3.5" /> {selected.profileSnapshot.emergencyContact}
+                        </p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.guardianName && (
+                      <div>
+                        <p className="text-amber-700">Guardian</p>
+                        <p className="font-medium text-amber-900 flex items-center gap-1">
+                          <UsersIcon className="h-3 w-3" />
+                          {selected.profileSnapshot.guardianName}
+                          {selected.profileSnapshot.guardianRelation && (
+                            <span className="text-amber-600">({selected.profileSnapshot.guardianRelation})</span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                    {selected.profileSnapshot.guardianContact && (
+                      <div>
+                        <p className="text-amber-700">Guardian Contact</p>
+                        <p className="font-medium text-amber-900 flex items-center gap-1">
+                          <Phone className="h-3 w-3" /> {selected.profileSnapshot.guardianContact}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Medical info */}
+                {(selected.profileSnapshot.bloodGroup || selected.profileSnapshot.medicalIllness) && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-red-900 mb-3 flex items-center gap-1.5">
+                      <Heart className="h-4 w-4 text-red-600" /> Medical Information
+                    </p>
+                    <div className="space-y-2 text-xs">
+                      {selected.profileSnapshot.bloodGroup && (
+                        <div>
+                          <span className="text-red-700">Blood Group: </span>
+                          <span className="font-bold text-red-900 font-mono">{selected.profileSnapshot.bloodGroup}</span>
+                        </div>
+                      )}
+                      {selected.profileSnapshot.medicalIllness && (
+                        <div>
+                          <p className="text-red-700">Medical Illness / Disability</p>
+                          <p className="text-red-900 mt-0.5 whitespace-pre-wrap">{selected.profileSnapshot.medicalIllness}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Voucher image */}

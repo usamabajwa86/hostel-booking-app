@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   User, IdCard, Phone, Home as HomeIcon, GraduationCap, Hash,
   CalendarDays, BookOpen, Save, CheckCircle2, AlertTriangle, Loader2,
+  ShieldAlert, Heart, Users as UsersIcon, Droplet,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
@@ -37,6 +38,14 @@ export default function Profile() {
     enrollmentYear: new Date().getFullYear().toString(),
     semesterStatus: 'first', // 'first' or 'senior'
     registrationNumber: '',
+    // Emergency + Guardian
+    emergencyContact: '',
+    guardianName: '',
+    guardianRelation: 'Father',
+    guardianContact: '',
+    // Medical
+    bloodGroup: '',
+    medicalIllness: '',
   });
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -348,6 +357,144 @@ export default function Profile() {
                 As a first-semester student you will provide bank challan details when booking your bed. Once your university registration number is issued, you can update this section.
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Emergency Contact & Guardian */}
+        <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <ShieldAlert className="h-5 w-5 text-emerald-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Emergency Contact &amp; Guardian</h2>
+          </div>
+          <p className="text-xs text-gray-500 mb-4 -mt-2">
+            These details are used by hostel staff in case of any emergency. All fields marked with <span className="text-red-500">*</span> are mandatory.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Emergency Contact Number <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="tel"
+                  name="emergencyContact"
+                  value={form.emergencyContact}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="A number we can reach in an emergency"
+                />
+              </div>
+              <p className="text-[11px] text-gray-400 mt-1">Usually a parent, sibling or close relative who can respond immediately.</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Guardian Name <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <UsersIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  name="guardianName"
+                  value={form.guardianName}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Full name of guardian"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Relationship</label>
+              <select
+                name="guardianRelation"
+                value={form.guardianRelation}
+                onChange={handleChange}
+                className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+                <option value="Brother">Brother</option>
+                <option value="Sister">Sister</option>
+                <option value="Uncle">Uncle</option>
+                <option value="Aunt">Aunt</option>
+                <option value="Guardian">Legal Guardian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Guardian Contact Number <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="tel"
+                  name="guardianContact"
+                  value={form.guardianContact}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g. 03001234567"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Medical Information */}
+        <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Heart className="h-5 w-5 text-emerald-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Medical Information</h2>
+          </div>
+          <p className="text-xs text-gray-500 mb-4 -mt-2">
+            These fields are optional but help hostel staff respond appropriately if you need care.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Blood Group</label>
+              <div className="relative">
+                <Droplet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <select
+                  name="bloodGroup"
+                  value={form.bloodGroup}
+                  onChange={handleChange}
+                  className="w-full pl-10 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="">Select blood group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Medical Illness / Disability
+              </label>
+              <textarea
+                name="medicalIllness"
+                value={form.medicalIllness}
+                onChange={handleChange}
+                rows={3}
+                className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="e.g. Asthma, diabetes, physical disability, allergies — or 'None'"
+              />
+              <p className="text-[11px] text-gray-400 mt-1">
+                This information remains private and is only visible to the hostel superintendent and administration for your safety.
+              </p>
+            </div>
           </div>
         </section>
 

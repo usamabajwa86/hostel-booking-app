@@ -59,7 +59,10 @@ export function AuthProvider({ children }) {
     user.profile.cnic &&
     user.profile.phone &&
     user.profile.fatherName &&
-    user.profile.address
+    user.profile.address &&
+    user.profile.emergencyContact &&
+    user.profile.guardianName &&
+    user.profile.guardianContact
   );
 
   const value = {

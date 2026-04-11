@@ -65,7 +65,10 @@ function isProfileComplete(user) {
     user.profile.cnic &&
     user.profile.phone &&
     user.profile.fatherName &&
-    user.profile.address
+    user.profile.address &&
+    user.profile.emergencyContact &&
+    user.profile.guardianName &&
+    user.profile.guardianContact
   );
 }
 
@@ -234,6 +237,12 @@ app.patch('/api/users/:id/profile', (req, res) => {
       'semester', 'department', 'enrollmentYear', 'program',
       'semesterStatus', // 'first' | 'senior'
       'registrationNumber', // required for senior students
+      'emergencyContact', // mandatory
+      'guardianName', // mandatory
+      'guardianContact', // mandatory
+      'guardianRelation', // optional (e.g. Father, Brother)
+      'medicalIllness', // optional — disabilities/chronic illnesses
+      'bloodGroup', // optional but useful
     ];
 
     const profile = users[idx].profile || {};
@@ -381,6 +390,23 @@ app.post('/api/requests', (req, res) => {
       challan: challan || null,
       semesterStatus: semesterStatus || (user.profile?.semesterStatus) || null,
       registrationNumber: registrationNumber || null,
+      // Snapshot of the student's profile at the moment of booking
+      profileSnapshot: user.profile ? {
+        fatherName: user.profile.fatherName,
+        cnic: user.profile.cnic,
+        phone: user.profile.phone,
+        address: user.profile.address,
+        program: user.profile.program,
+        degreeName: user.profile.degreeName,
+        department: user.profile.department,
+        semester: user.profile.semester,
+        emergencyContact: user.profile.emergencyContact,
+        guardianName: user.profile.guardianName,
+        guardianRelation: user.profile.guardianRelation,
+        guardianContact: user.profile.guardianContact,
+        bloodGroup: user.profile.bloodGroup,
+        medicalIllness: user.profile.medicalIllness,
+      } : null,
       status: 'pending',
       submittedAt: now,
       history: [
@@ -538,6 +564,14 @@ app.get('/api/superintendent/:hostelId/students', (req, res) => {
         program: u?.profile?.program || u?.program || null,
         semester: u?.profile?.semester || null,
         degreeName: u?.profile?.degreeName || null,
+        fatherName: u?.profile?.fatherName || null,
+        address: u?.profile?.address || null,
+        emergencyContact: u?.profile?.emergencyContact || null,
+        guardianName: u?.profile?.guardianName || null,
+        guardianRelation: u?.profile?.guardianRelation || null,
+        guardianContact: u?.profile?.guardianContact || null,
+        bloodGroup: u?.profile?.bloodGroup || null,
+        medicalIllness: u?.profile?.medicalIllness || null,
         roomNumber: r.roomNumber,
         bedId: r.bedId,
         status: r.status,
@@ -603,7 +637,13 @@ app.get('/api/admin/export/students', (req, res) => {
     const users = readJSON(USERS_FILE).filter(u => u.role === 'student');
     const requests = readJSON(REQUESTS_FILE);
 
-    const headers = ['Name', 'Reg / Student ID', 'Email', 'Phone', 'CNIC', 'Program', 'Semester', 'Registered', 'Booking Status', 'Hostel', 'Room', 'Bed'];
+    const headers = [
+      'Name', 'Reg / Student ID', 'Email', 'Phone', 'CNIC', 'Program', 'Semester',
+      "Father's Name", 'Address',
+      'Emergency Contact', 'Guardian Name', 'Guardian Relation', 'Guardian Contact',
+      'Blood Group', 'Medical Illness',
+      'Registered', 'Booking Status', 'Hostel', 'Room', 'Bed',
+    ];
     const rows = users.map(u => {
       const booking = requests.find(r => r.userId === u.id && r.status === 'approved');
       const pending = requests.find(r => r.userId === u.id && r.status === 'pending');
@@ -616,6 +656,14 @@ app.get('/api/admin/export/students', (req, res) => {
         u.profile?.cnic || '',
         u.profile?.program || u.program || '',
         u.profile?.semester || '',
+        u.profile?.fatherName || '',
+        u.profile?.address || '',
+        u.profile?.emergencyContact || '',
+        u.profile?.guardianName || '',
+        u.profile?.guardianRelation || '',
+        u.profile?.guardianContact || '',
+        u.profile?.bloodGroup || '',
+        u.profile?.medicalIllness || '',
         u.registeredAt || '',
         booking ? 'Approved' : pending ? 'Pending' : 'No Booking',
         active ? active.hostelName : '',

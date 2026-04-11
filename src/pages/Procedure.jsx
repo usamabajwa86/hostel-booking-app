@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   UserPlus,
   Search,
@@ -11,7 +12,102 @@ import {
   Clock,
   IdCard,
   Mail,
+  HelpCircle,
+  ChevronDown,
 } from 'lucide-react';
+
+const faqs = [
+  {
+    q: 'Who is eligible to apply for a hostel?',
+    a: 'All currently enrolled female students of the University of Agriculture, Faisalabad — undergraduate, postgraduate and PhD/Scholar — are eligible to apply for on-campus accommodation through this portal.',
+  },
+  {
+    q: 'How does email verification work?',
+    a: 'When you register, the portal sends a 6-digit verification code to your email address. You enter that code on the next screen to confirm your email before your account is created. The code expires after 10 minutes; you can request a new one at any time.',
+  },
+  {
+    q: 'Why do I have to complete my student profile before booking?',
+    a: 'Booking is locked until your profile is complete so that hostel staff have all the information they need (contact, guardian, emergency, medical) at hand the moment your booking is reviewed. You only fill the profile once — it stays with you through your whole degree.',
+  },
+  {
+    q: 'I am a first semester student and do not have a registration number yet. Can I still apply?',
+    a: 'Yes. First-semester students can apply using their bank challan details — you will be asked for the bank name, total amount paid, challan number, branch and submission date, plus a scanned copy of the paid voucher. Once your registration number is issued, you can update your profile.',
+  },
+  {
+    q: 'I am in my 2nd semester or higher. What do I need?',
+    a: 'Senior students must fill in their university registration number in the profile page. When booking, the system will automatically attach that number to your request — no challan is required.',
+  },
+  {
+    q: 'What are the required profile fields?',
+    a: "Father's name, CNIC, phone, permanent address, degree name, current semester, emergency contact number, guardian name, and guardian contact number are all required. Blood group and any medical illness or disability are optional but strongly encouraged so staff can respond appropriately in an emergency.",
+  },
+  {
+    q: 'Why do you need an emergency contact and guardian details?',
+    a: 'In case of any medical or safety emergency, hostel staff need someone they can reach immediately. This information is only visible to your hostel superintendent and the university administration — it is not shown publicly anywhere.',
+  },
+  {
+    q: 'Is my medical information kept private?',
+    a: 'Yes. Medical illness, disability and blood group are only visible to the superintendent of the hostel you book and to the UAF hostel administration. They are never shown on any public page.',
+  },
+  {
+    q: 'How long does approval take?',
+    a: 'Most booking requests are processed within 2-3 working days. During peak admission periods the review may take slightly longer. You can track the status of your request in real time from the "My Bookings" page.',
+  },
+  {
+    q: 'Can I book more than one bed at the same time?',
+    a: 'No. Only one pending booking request is allowed per student at a time. If your request is rejected or you vacate an existing booking, you can submit a new request immediately.',
+  },
+  {
+    q: 'What happens if I am a UG student and try to book a PG-only hostel?',
+    a: "The booking will be blocked and you will see a clear 'not eligible' message. Maryam Hall Block C is currently the only postgraduate-only hostel. Undergraduate students see the remaining 16 hostels, all of which have UG rooms available.",
+  },
+  {
+    q: 'Can I change my room or hostel after it has been approved?',
+    a: 'Yes. Vacate your current booking from the "My Bookings" page first, and then submit a new booking request for the room or hostel you prefer. Your booking history is preserved for audit purposes.',
+  },
+  {
+    q: 'What is a UG room vs a PG room?',
+    a: 'UG rooms are dormitory-style rooms (typically 5 beds per room) for undergraduate students. PG rooms are smaller "coupled" or "warden" rooms (typically 2-3 beds per room) for postgraduate students. The room types are marked clearly on every hostel detail page.',
+  },
+  {
+    q: 'Why can only the hostel superintendent see my booking?',
+    a: "Each of our 17 hostels has its own superintendent and its own scoped portal. Superintendents only see requests and residents from their own hostel. The central UAF hostel administration still has full access to every hostel's data for oversight and reporting.",
+  },
+  {
+    q: 'What if I lose access to my email or forget my password?',
+    a: 'Contact the hostel coordinator, Humera Razaq, directly. Her email and phone number are available on the Contact page. A manual account reset can be performed by the administration.',
+  },
+  {
+    q: 'Is this portal only for female students?',
+    a: 'Yes. The UAF Women\'s Hostel Accommodation Portal is dedicated exclusively to the 17 female residential halls on campus. Male hostels are managed through a separate system.',
+  },
+];
+
+function FAQItem({ q, a, open, onToggle }) {
+  return (
+    <div className="border-b border-gray-100 last:border-b-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-gray-50/60 transition-colors"
+      >
+        <span className="text-sm font-semibold text-gray-900">{q}</span>
+        <ChevronDown
+          className={`h-4 w-4 text-gray-400 flex-shrink-0 transition-transform duration-200 ${
+            open ? 'rotate-180 text-emerald-600' : ''
+          }`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <p className="px-5 pb-4 text-sm text-gray-600 leading-relaxed">{a}</p>
+      </div>
+    </div>
+  );
+}
 
 const steps = [
   {
@@ -74,6 +170,7 @@ const rules = [
 ];
 
 export default function Procedure() {
+  const [openFaq, setOpenFaq] = useState(0);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
@@ -198,6 +295,36 @@ export default function Procedure() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-16">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 text-emerald-700 mb-2">
+              <HelpCircle className="h-5 w-5" />
+              <span className="text-xs font-bold tracking-widest uppercase">Help Center</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Frequently Asked Questions</h2>
+            <p className="text-gray-500 mt-2 text-sm">
+              Answers to the most common questions about hostel booking at UAF.
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {faqs.map((f, i) => (
+              <FAQItem
+                key={i}
+                q={f.q}
+                a={f.a}
+                open={openFaq === i}
+                onToggle={() => setOpenFaq(openFaq === i ? -1 : i)}
+              />
+            ))}
+          </div>
+
+          <p className="text-center text-xs text-gray-400 mt-6">
+            Still have questions? Contact <a href="mailto:Humerarazzaq@gmail.com" className="text-emerald-700 font-semibold hover:underline">Humera Razaq</a> at 03326683378.
+          </p>
         </div>
       </div>
     </div>
